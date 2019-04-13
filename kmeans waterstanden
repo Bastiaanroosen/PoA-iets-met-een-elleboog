@@ -1,0 +1,93 @@
+#lbraries
+library(dplyr)
+library(ggplot2)
+library(cluster)
+library(fpc)
+
+# kolommen hernoemen, spaties verwijderen
+
+colnames(allestanden4)[colnames(allestanden4)=="Hagestein beneden"] <- "HAGESTEIN"
+colnames(allestanden4)[colnames(allestanden4)=="IJmuiden buitenhaven"] <- "IJMUIDENBUITEN"
+colnames(allestanden4)[colnames(allestanden4)=="IJmuiden stroommeetpaal"] <- "IJMUIDENSTROOM"
+
+#Vaststellen wat de gemiddelde waterstand is per meetpunt. 
+
+mean(allestanden4$BUITENHUIZEN)        # -42.80601
+mean(allestanden4$SURINAME)            # -41.34966
+mean(allestanden4$HAGESTEIN)           # 71.62472
+mean(allestanden4$IJMUIDENBUITEN)      # 3.902489
+mean(allestanden4$IJMUIDENSTROOM)      # 4.84723
+
+# vaststellen standaard deviatie van de verschillende meetpunten
+
+sd(allestanden4$BUITENHUIZEN)        # 3.4958
+sd(allestanden4$SURINAME)            # 3.722833
+sd(allestanden4$HAGESTEIN)           # 78.28153
+sd(allestanden4$IJMUIDENBUITEN)      # 60.48871
+sd(allestanden4$IJMUIDENSTROOM)      # 60.82286
+
+# vaststellen kleinste waarde per meetpunt
+
+min(allestanden4$BUITENHUIZEN)        # - 60
+min(allestanden4$SURINAME)            # - 58
+min(allestanden4$HAGESTEIN)           # - 113
+min(allestanden4$IJMUIDENBUITEN)      # - 193
+min(allestanden4$IJMUIDENSTROOM)      # - 191
+
+# vaststellen grootste waarde per meetpunt
+
+max(allestanden4$BUITENHUIZEN)        # - 22
+max(allestanden4$SURINAME)            # - 19
+max(allestanden4$HAGESTEIN)           #  422
+max(allestanden4$IJMUIDENBUITEN)      #  293
+max(allestanden4$IJMUIDENSTROOM)      #  288
+
+# plot values to a box plot
+boxplot(allestanden4$BUITENHUIZEN)
+boxplot(allestanden4$SURINAME)
+boxplot(allestanden4$HAGESTEIN)
+boxplot(allestanden4$IJMUIDENBUITEN)
+boxplot(allestanden4$IJMUIDENSTROOM)
+
+# plot histograms
+hist(allestanden4$BUITENHUIZEN)
+hist(allestanden4$SURINAME)
+hist(allestanden4$HAGESTEIN)
+hist(allestanden4$IJMUIDENBUITEN)
+hist(allestanden4$IJMUIDENSTROOM)
+
+# clustering using k means clustering to categorise HAGESTEIN INTO 5 categories
+
+set.seed(1234)
+
+clusters <- kmeans(allestanden4[,5], 5)
+
+
+# Save the cluster number in the dataset as column 'Borough'
+allestanden4$HAGENSTEINCLUS <- as.factor(clusters$cluster)
+
+# Inspect clusters
+str(clusters)
+
+# Plot cluster onto graph
+plotcluster(allestanden4$HAGESTEIN, clusters$cluster)
+
+# Rename cluster numbers to categories
+allestanden5 <- allestanden4
+allestanden5$HAGENSTEINCLUS <- gsub(1, "normaal", allestanden4$HAGENSTEINCLUS)
+allestanden5$HAGENSTEINCLUS <- gsub(2, "laag", allestanden5$HAGENSTEINCLUS)
+allestanden5$HAGENSTEINCLUS <- gsub(3, "extreemlaag", allestanden5$HAGENSTEINCLUS)
+allestanden5$HAGENSTEINCLUS <- gsub(4, "extreemhoog", allestanden5$HAGENSTEINCLUS)
+allestanden5$HAGENSTEINCLUS <- gsub(5, "hoog", allestanden5$HAGENSTEINCLUS)
+
+table(allestanden5$HAGENSTEINCLUS)
+
+hist(allestanden5$HAGESTEIN)
+
+# WE ARE NOT COMPLETELY SATISFIED WITH THE RESULTS
+# Attempt using nstart
+
+allestanden6 <- select(allestanden4, "HAGESTEIN", "HAGENSTEINCLUS")
+cluster2 <- kmeans(allestanden6[, 1:2], 5, nstart = 25)
+str(cluster2)
+plotcluster(allestanden6$HAGESTEIN, cluster2$cluster)
