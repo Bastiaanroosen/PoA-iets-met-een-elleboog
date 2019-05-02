@@ -1,0 +1,94 @@
+library(dplyr)
+
+#import CSVs allestanden in de haven, de rijn en de zee
+havenwaterstand <- read.csv("C:/Users/Bastiaan.Roosen/Documents/ICT Deeltijd studie/Jaar 2 Big Data/Big Data MJJBX/Raw Data/20190322_025.csv", sep = ";")
+rijnenzeestand <- read.csv("C:/Users/Bastiaan.Roosen/Documents/ICT Deeltijd studie/Jaar 2 Big Data/Big Data MJJBX/Raw Data/20190322_029.csv", sep = ";")
+
+#combine allestanden haven with rijn and zee. 
+allestanden <- rbind(havenwaterstand, rijnenzeestand)
+
+
+#selecteer kolommen die we mee willen nemen voor analyse
+allestanden2 <- select(allestanden, MEETPUNT_IDENTIFICATIE, 
+                        GROOTHEID_OMSCHRIJVING, 
+                        EENHEID_CODE,
+                        HOEDANIGHEID_CODE,
+                        WAARNEMINGDATUM, 
+                        WAARNEMINGTIJD, 
+                        NUMERIEKEWAARDE,
+                        KWALITEITSOORDEEL_CODE)
+
+#clean up data
+allestanden2 <- filter(allestanden2, allestanden2$NUMERIEKEWAARDE < 999999999)
+allestanden2 <- filter(allestanden2, allestanden2$NUMERIEKEWAARDE > -861)
+allestanden2$MEETPUNT_IDENTIFICATIE <- gsub("\\s*\\([^\\)]+\\)", "", as.character(allestanden2$MEETPUNT_IDENTIFICATIE))
+allestanden2$MEETPUNT_IDENTIFICATIE <- gsub("Amsterdam\\s*\\ ", "", allestanden2$MEETPUNT_IDENTIFICATIE)
+
+#drop Hagenstein boven als meetpunt, omdat hier veel waardes missen. 
+#Niet nodig vanwege nieuw filter op outliers
+#allestanden2 <- filter(allestanden2, allestanden2$MEETPUNT_IDENTIFICATIE != "Hagestein boven")
+
+#create date-time column
+allestanden2 <- mutate(allestanden2, datumtijd = paste(WAARNEMINGDATUM, WAARNEMINGTIJD, sep = " "))
+allestanden2$datumtijd <- as.POSIXct(allestanden2$datumtijd, tz ="Etc/GMT+1", "%d-%m-%Y %H:%M:%S")
+allestanden2$WAARNEMINGDATUM <- as.Date(allestanden2$WAARNEMINGDATUM, "%d-%m-%Y")
+glimpse(allestanden2)
+
+#split df to buitenhuizen and surinamekade
+
+summary(allestanden4)
+
+waterstandenSuri <- filter(allestanden2, MEETPUNT_IDENTIFICATIE == "Surinamekade") 
+waterstandenBuit <- filter(allestanden2, MEETPUNT_IDENTIFICATIE == "Buitenhuizen")
+waterstandenBenRijn <- filter(allestanden2, MEETPUNT_IDENTIFICATIE == "Hagestein beneden")
+waterstandenBovRijn <- filter(allestanden2, MEETPUNT_IDENTIFICATIE == "Hagestein boven")
+waterstandenIJBuit <- filter(allestanden2, MEETPUNT_IDENTIFICATIE == "IJmuiden buitenhaven")
+waterstandenIJSro <- filter(allestanden2, MEETPUNT_IDENTIFICATIE == "IJmuiden stroommeetpaal")
+
+glimpse(waterstandenBenRijn)
+glimpse(waterstandenBovRijn)
+glimpse(waterstandenBuit)
+glimpse(waterstandenSuri)
+glimpse(waterstandenIJBuit)
+glimpse(waterstandenIJSro)
+
+# show min and max date
+#waterstandenBovRijn[which.min(as.POSIXct(waterstandenBovRijn$datumtijd)), ]
+
+#Merge tabellen
+#allestanden3 <- merge(waterstandenBuit, waterstandenSuri, waterstandenBenRijn, waterstandenBovRijn, waterstandenIJBuit, waterstandenIJSro, by = "datumtijd")
+havenstanden <- merge(waterstandenBuit, waterstandenSuri, by = "datumtijd")
+zeestanden <- merge(waterstandenIJBuit, waterstandenIJSro, by = "datumtijd")
+nonhavenstanden <- merge(zeestanden, waterstandenBenRijn, by = "datumtijd")
+#allestanden3 <- merge(havenstanden, nonhavenstanden, by = "datumtijd")
+
+#NA remove clean
+cleannonhavenstanden <- nonhavenstanden[complete.cases(nonhavenstanden$datumtijd), ]
+cleanhavenstanden <- havenstanden[complete.cases(havenstanden$datumtijd), ]
+allestanden3 <- merge(cleanhavenstanden, cleannonhavenstanden, by = "datumtijd")
+
+#Clean up column and rename properly
+colnames(allestanden3)[colnames(allestanden3)=="NUMERIEKEWAARDE.x.x"] <- "BUITENHUIZEN"
+colnames(allestanden3)[colnames(allestanden3)=="NUMERIEKEWAARDE.y.x"] <- "SURINAME"
+colnames(allestanden3)[colnames(allestanden3)=="NUMERIEKEWAARDE"] <- "Hagestein beneden"
+colnames(allestanden3)[colnames(allestanden3)=="NUMERIEKEWAARDE.x.y"] <- "IJmuiden buitenhaven"
+colnames(allestanden3)[colnames(allestanden3)=="NUMERIEKEWAARDE.y.y"] <- "IJmuiden stroommeetpaal"
+
+
+#final full data of 5 meetpunten
+allestanden4 <- select(allestanden3, datumtijd, WAARNEMINGDATUM, BUITENHUIZEN, SURINAME, "Hagestein beneden", "IJmuiden buitenhaven", "IJmuiden stroommeetpaal")
+glimpse(allestanden4)
+
+#add means
+allestanden4 <- mutate(allestanden4, HAVENMEAN = (BUITENHUIZEN + SURINAME) / 2)
+allestanden4 <- mutate(allestanden4, ZEEMEAN = (allestanden4$`IJmuiden buitenhaven` + allestanden4$`IJmuiden stroommeetpaal`) / 2)
+
+########################################################
+#attempt a group by
+#summarize(group_by(allestanden4, WAARNEMINGDATUM.x), MEAN=mean(allestanden4$MEAN))
+#plot(allestanden4 %>% group_by(WAARNEMINGDATUM.x) %>% summarise(MEANY=mean(MEAN)))
+
+#plot over time
+plot(allestanden4$datumtijd[1:144], allestanden4$HAVENMEAN[1:144])
+plot(allestanden4$datumtijd, allestanden4$`Hagestein beneden`)
+plot(allestanden4$datumtijd[410000:464266], allestanden4$`Hagestein beneden`[410000:464266])
