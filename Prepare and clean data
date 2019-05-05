@@ -1,0 +1,92 @@
+# --------------------------- # Inlezen data --------------------------------------------------------------------------------------------------------------------------------
+
+#In deze file zullen de tabellen worden ingelezen en in een dataframe worden geplaatst
+
+# --------------------------- # Installeer packages --------------------------------------------------------------------------------------------------------------------------------
+
+# Installeer de packages
+list.of.packages <- c("DBI",                               
+                      "RMySQL")                            
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
+
+# Laden van de packages
+library(DBI)
+library(RMySQL)
+library(dplyr)
+
+# --------------------------- # Tabellen POA_HaMIS inladen --------------------------------------------------------------------------------------------------------------------------------
+
+# database: POA_HaMIS
+# Database connection string
+dbConn <- dbConnect(
+  MySQL(),
+  user="POAproject",
+  password="DBpass2PoAdam4PoaGrp",
+  dbname='POA_HaMIS',
+  host='127.0.0.1'
+)
+
+# Toon alle tabellen in de database POA_HaMIS
+dbListTables(dbConn)
+
+#sla alle tabellen op in een dataframe met een eigen naam
+for(i in 1:length(dbListTables(dbConn))){
+  rs <- dbSendQuery(dbConn, paste0("select * from ", dbListTables(dbConn)[[i]]))
+  df<-fetch(rs, n=-1)
+  assign(paste0("df1_",dbListTables(dbConn)[[i]]), df )
+  dbClearResult(rs)
+  
+}
+
+#verbreek de connectie
+RMySQL::dbDisconnect(dbConn)
+
+
+# --------------------------- # Tabellen POA_HaMIS_DWH inladen --------------------------------------------------------------------------------------------------------------------------------
+
+# database: POA_HaMIS_DWH
+# Database connection string 
+dbConn <- dbConnect(
+  MySQL(),
+  user="POAproject",
+  password="DBpass2PoAdam4PoaGrp",
+  dbname='POA_HaMIS_DWH',
+  host='127.0.0.1'
+)
+
+# Toon alle tabellen in de database POA_HaMIS_DWH
+dbListTables(dbConn)
+
+#sla alle tabellen op in een dataframe met een eigen naam
+for(i in 1:length(dbListTables(dbConn))){
+  rs <- dbSendQuery(dbConn, paste0("select * from ", dbListTables(dbConn)[[i]]))
+  df<-fetch(rs, n=-1)
+  assign(paste0("df2_",dbListTables(dbConn)[[i]]), df )
+  dbClearResult(rs)
+  
+}
+
+# --------------------------- # Extra dataset inladen --------------------------------------------------------------------------------------------------------------------------------
+
+# Inladen van de extra dataset over de ligplaatsen
+library(readxl)
+ligplaatsen_haven <- read_excel("POAdata/scripts/ligplaatsen-haven.xlsx")
+
+#verbreek de connectie
+RMySQL::dbDisconnect(dbConn)
+
+# --------------------------- # Remove any useless dataframes --------------------------------------------------------------------------------------------------------------------------------
+
+#remove all df1's
+rm(df, df1_IRS_ANNOUNCEMENT_VW, df1_IRS_BERTHVISIT_HISTORY_VW, df1_IRS_BERTHVISIT_VW, 
+   df1_IRS_CARGO_ABOARD_VW, df1_IRS_LOCKCOMPLEX_VISIT_VW, df1_IRS_LOCKTURN_RECREATIONAL_VW, 
+   df1_IRS_LOCKTURN_VW, df1_IRS_MOVEMENT_HISTORY_VW, df1_IRS_MOVEMENT_VW, 
+   df1_IRS_MUTATION_EXTPAR_BLOB_VW, df1_IRS_PASSAGE_CROSSING_VW, df1_IRS_PREVIOUS_PORT_VW, 
+   df1_IRS_REF_BERTH_VW, df1_IRS_REF_IMDG_VW, df1_IRS_REF_SHIP_VW, df1_IRS_VESSELVISIT_VW)
+
+#remove unnecessary tables
+rm(df2_IRS_ANNOUNCEMENT_VW, df2_IRS_BERTHVISIT_VW, df2_IRS_CARGO_ABOARD_VW, 
+   df2_IRS_LOCKCOMPLEX_VISIT_VW,    df2_IRS_LOCKTURN_RECREATIONAL_VW, 
+   df2_IRS_LOCKTURN_VW, df2_IRS_MOVEMENT_VW, df2_IRS_PASSAGE_CROSSING_VW, 
+   df2_IRS_PREVIOUS_PORT_VW, df2_IRS_REF_IMDG_VW)
