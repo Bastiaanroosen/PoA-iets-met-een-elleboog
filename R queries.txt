@@ -1,3 +1,6 @@
+# With these queries we clean the data frames, to obtain the columns we need.
+
+
 movement_history_vw_clean <- select(movement_history_vw, c(MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID, ))
 
 ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
