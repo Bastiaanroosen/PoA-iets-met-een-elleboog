@@ -15,10 +15,10 @@ colnames(waterstanden1)[colnames(waterstanden1)=="IJmuiden_stroommeetpaal"] <- "
 
 # add new columns to be filled with categories. 
 waterstanden1$BUITENHUIZENCAT <- waterstanden1$BUITENHUIZEN
-waterstanden1$SURINAMECAT <- NA
-waterstanden1$HAGESTEINCAT <- NA
-waterstanden1$IJMUIDENBUITENCAT <- NA
-waterstanden1$IJMUIDENSTROOMCAT <- NA
+waterstanden1$SURINAMECAT <- waterstanden1$SURINAME
+waterstanden1$HAGESTEINCAT <- waterstanden1$HAGESTEIN
+waterstanden1$IJMUIDENBUITENCAT <- waterstanden1$IJMUIDENBUITEN
+waterstanden1$IJMUIDENSTROOMCAT <- waterstanden1$IJMUIDENSTROOM
 
 # fill categories for Buitenhuizen. Chosen categories are:  
 # x is smaller than -48 as "VERY LOW"
@@ -72,3 +72,6 @@ waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM < -80] = "VERY LOW
 waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM >= -80 & waterstanden1$IJMUIDENSTROOM<= 5] = "LOW"
 waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM > 5 & waterstanden1$IJMUIDENSTROOM <= 100] = "HIGH"
 waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM > 100] = "VERY HIGH"
+
+# get rid of any boolean columns
+waterstanden1 <-as.data.frame(waterstanden1)
