@@ -1,0 +1,5 @@
+movement_history_vw_clean <- select(movement_history_vw, c(MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID, ))
+
+ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
+
+df2_IRS_REF_SHIP_VW_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
