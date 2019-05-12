@@ -27,3 +27,6 @@ ligplaatsen_haven_clean2 <- na.omit(ligplaatsen_haven_clean)
 View(ligplaatsen_haven_clean2)
 ref_ship_vw_clean2 <- na.omit(ref_ship_vw_clean)
 View(ref_ship_vw_clean2)
+
+#Hiermee kunnen wij aantal NA tellen per kolom
+sum(is.na(movement_history_vw_clean$BV_ARR_COMM_ID))
