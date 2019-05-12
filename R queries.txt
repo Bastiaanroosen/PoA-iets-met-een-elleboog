@@ -14,3 +14,16 @@ ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_L
 ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
 
 berthvisit_history_vw <- select(df2_IRS_BERTHVISIT_HISTORY_VW, c(D_MUTATION, T_MUTATION, BERTHVISIT_COMM_ID, BERTH_NAME, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD))
+
+# Alle lege cellen in de tabel omzetten naar NA
+movement_history_vw_clean[movement_history_vw_clean == ""] <- NA
+ligplaatsen_haven_clean[ligplaatsen_haven_clean == ""] <- NA
+ref_ship_vw_clean[ref_ship_vw_clean == ""] <- NA
+
+# een object <naam_df>2 aanmaken die alle data van <naam_df> bevat zonder de NA's
+movement_history_vw_clean2 <- na.omit(movement_history_vw_clean)
+View(movement_history_vw_clean2)
+ligplaatsen_haven_clean2 <- na.omit(ligplaatsen_haven_clean)
+View(ligplaatsen_haven_clean2)
+ref_ship_vw_clean2 <- na.omit(ref_ship_vw_clean)
+View(ref_ship_vw_clean2)
