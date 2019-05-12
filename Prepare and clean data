@@ -14,6 +14,7 @@ if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-
 library(DBI)
 library(RMySQL)
 library(dplyr)
+library(lubridate)
 
 # --------------------------- # Tabellen POA_HaMIS inladen --------------------------------------------------------------------------------------------------------------------------------
 
@@ -109,5 +110,18 @@ df2_IRS_VESSELVISIT_VW_clean2$datumtijdstart <- round_date(df2_IRS_VESSELVISIT_V
 df2_IRS_VESSELVISIT_VW_clean2 <- mutate(df2_IRS_VESSELVISIT_VW_clean2, datumtijdend = paste(D_END, T_END, sep = " "))
 df2_IRS_VESSELVISIT_VW_clean2$datumtijdend <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean2$datumtijdend, tz ="Etc/GMT+1", "%Y%m%d %H%M")
 df2_IRS_VESSELVISIT_VW_clean2$datumtijdend <- round_date(df2_IRS_VESSELVISIT_VW_clean2$datumtijdend, unit = "10 minutes")
-#---------------------------------
 
+rm(df2_IRS_VESSELVISIT_VW_clean)
+
+#------------------------CLEAN MOVEMENT, Ligplaatsen en REF_SHIP_VW and Remove unnecessary---------------------#
+
+movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
+rm(df2_IRS_MOVEMENT_HISTORY_VW)
+
+ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
+rm(ligplaatsen_haven)
+
+ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
+rm(df2_IRS_REF_SHIP_VW)
+
+#------------------------
