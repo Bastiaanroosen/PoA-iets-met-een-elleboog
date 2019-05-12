@@ -1,0 +1,11 @@
+# ------------------------------- # JOOOOIN ---------------------------------------------------------------------------------------------------------------------------------
+library(dplyr)
+
+# Berthvisit zonder de deleted mutation type.
+kopie_IRS_BERTHVISIT_VW <- kopie_IRS_BERTHVISIT_VW %>% filter(MUTATION_TYPE == "CREATED" | MUTATION_TYPE == "UPDATED")
+
+# Één tabel maken met de Berth gegevens en Ref ship gegevens
+join_IRS_BERTHVISIT_VW <- left_join(kopie_IRS_BERTHVISIT_VW, kopie_ligplaatsen_haven, by = c("BERTH_CODE" = "Ligplaatscode"))
+join_IRS_VESSELVISIT_VW <- left_join(kopie_IRS_VESSELVISIT_VW, kopie_IRS_REF_SHIP_VW, by="SHIP_COMM_ID")
+join_IRS_MOVEMENT_VW <- left_join(kopie_IRS_MOVEMENT_VW, join_IRS_VESSELVISIT_VW, by="VESSELVISIT_COMM_ID")
+tijd_aan_ligplaats <- left_join(join_IRS_BERTHVISIT_VW, join_IRS_MOVEMENT_VW, by = c("BERTHVISIT_COMM_ID" = "BV_ARR_COMM_ID"))
