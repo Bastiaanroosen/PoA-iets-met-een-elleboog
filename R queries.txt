@@ -1,4 +1,6 @@
 library(dplyr)
+library(RMySQL)
+library(DBI)
 
 load("~/POAdata/scripts/ingelezen.data.Rdata")
 
