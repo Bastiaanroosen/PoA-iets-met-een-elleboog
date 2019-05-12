@@ -112,16 +112,13 @@ rm(df2_IRS_BERTHVISIT_HISTORY_VW)
 movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MUTATION_TYPE, MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
 movement_vw_clean <- select(df2_IRS_MOVEMENT_VW, c(MUTATION_TYPE, MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
 movement_total <- rbind(movement_vw_clean, movement_history_vw_clean)
-rm(df2_IRS_MOVEMENT_HISTORY_VW, df2_IRS_MOVEMENT_VW, movement_vw_clean, movement_history_vw_clean)
+filtered_movement <- filter(movement_total, movement_total$MUTATION_TYPE == "CREATED")
+rm(df2_IRS_MOVEMENT_HISTORY_VW, df2_IRS_MOVEMENT_VW, movement_vw_clean, movement_history_vw_clean, movement_total)
 
 ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
 rm(ligplaatsen_haven)
 
 ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
 rm(df2_IRS_REF_SHIP_VW)
-
-
-
-
 
 #------------------------
