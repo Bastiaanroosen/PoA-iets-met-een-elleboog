@@ -1,16 +1,15 @@
 #----------------------------------
 #select, clean and copy
 df2_IRS_VESSELVISIT_VW_clean <- select(df2_IRS_VESSELVISIT_VW, c(UCRN, VESSELVISIT_COMM_ID, D_START, T_START, D_END, T_END, BARGE_NUMBER))
-df2_IRS_VESSELVISIT_VW_clean2 <- df2_IRS_VESSELVISIT_VW_clean
 
 #create date-time start column
-df2_IRS_VESSELVISIT_VW_clean2 <- mutate(df2_IRS_VESSELVISIT_VW_clean2, datumtijdstart = paste(D_START, T_START, sep = " "))
-df2_IRS_VESSELVISIT_VW_clean2$datumtijdstart <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean2$datumtijdstart, tz ="Etc/GMT+1", "%Y%m%d %H%M")
-df2_IRS_VESSELVISIT_VW_clean2$datumtijdstart <- round_date(df2_IRS_VESSELVISIT_VW_clean2$datumtijdstart, unit = "10 minutes")
+df2_IRS_VESSELVISIT_VW_clean <- mutate(df2_IRS_VESSELVISIT_VW_clean, datumtijdstart = paste(D_START, T_START, sep = " "))
+df2_IRS_VESSELVISIT_VW_clean$datumtijdstart <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_VESSELVISIT_VW_clean$datumtijdstart <- round_date(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, unit = "10 minutes")
 
 
 #create date-time end column
-df2_IRS_VESSELVISIT_VW_clean2 <- mutate(df2_IRS_VESSELVISIT_VW_clean2, datumtijdend = paste(D_END, T_END, sep = " "))
-df2_IRS_VESSELVISIT_VW_clean2$datumtijdend <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean2$datumtijdend, tz ="Etc/GMT+1", "%Y%m%d %H%M")
-df2_IRS_VESSELVISIT_VW_clean2$datumtijdend <- round_date(df2_IRS_VESSELVISIT_VW_clean2$datumtijdend, unit = "10 minutes")
+df2_IRS_VESSELVISIT_VW_clean <- mutate(df2_IRS_VESSELVISIT_VW_clean, datumtijdend = paste(D_END, T_END, sep = " "))
+df2_IRS_VESSELVISIT_VW_clean$datumtijdend <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_VESSELVISIT_VW_clean$datumtijdend <- round_date(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, unit = "10 minutes")
 #---------------------------------
