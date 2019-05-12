@@ -55,7 +55,7 @@ RMySQL::dbDisconnect(dbConn)
 rm(df2_IRS_ANNOUNCEMENT_VW, df2_IRS_BERTHVISIT_VW, df2_IRS_CARGO_ABOARD_VW, 
    df2_IRS_LOCKCOMPLEX_VISIT_VW,    df2_IRS_LOCKTURN_RECREATIONAL_VW, 
    df2_IRS_LOCKTURN_VW, df2_IRS_PASSAGE_CROSSING_VW, 
-   df2_IRS_PREVIOUS_PORT_VW, df2_IRS_REF_IMDG_VW)
+   df2_IRS_PREVIOUS_PORT_VW, df2_IRS_REF_IMDG_VW, df2_IRS_REF_BERTH_VW)
    
    
 # ---------------------------------- Clean VESSELVISIT -----------------------------------------------#
@@ -78,6 +78,8 @@ df2_IRS_VESSELVISIT_VW_clean <- select (df2_IRS_VESSELVISIT_VW_clean, -c(D_START
 rm(df2_IRS_VESSELVISIT_VW)
 
 # ---------------------------------- Create date-time BERTHVISIT_HISTORY_VW -----------------------------------------------#
+
+
 df2_IRS_BERTHVISIT_HISTORY_VW_clean <- select (df2_IRS_BERTHVISIT_HISTORY_VW, c(BERTHVISIT_COMM_ID, BERTH_CODE, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD, D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
 #create date-time start estimate column
 df2_IRS_BERTHVISIT_HISTORY_VW_clean <- mutate(df2_IRS_BERTHVISIT_HISTORY_VW_clean, datumtijdstartestimate = paste(D_BERTH_ETA, T_BERTH_ETA, sep = " "))
