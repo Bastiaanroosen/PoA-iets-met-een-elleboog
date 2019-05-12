@@ -1,0 +1,49 @@
+# Notes about this code: in Hamis zijn de coordinaten niet aanwezig, deze code is nu nog geijkt op de openbare data. 
+
+#----------------------------------------global.R---------------------------------------
+# load required libraries
+
+library(shiny)
+library(leaflet)
+library(dplyr)
+
+#import data
+df <- read.csv("C:/Users/Xanne/Documents/School/Jaar 2/Big Data/Big Data/Project_Port/ruwe_data/Ligplaatsen_binnenvaart.csv", fileEncoding = "UTF-16", sep = "\t", header = TRUE, stringsAsFactors = F)
+
+# used sources 
+# https://medium.com/@joyplumeri/how-to-make-interactive-maps-in-r-shiny-brief-tutorial-c2e1ef0447da
+# https://www.datascience.com/blog/beginners-guide-to-shiny-and-leaflet-for-interactive-mapping
+# https://rstudio.github.io/leaflet/markers.html
+
+#---------------------------------------ui.R-------------------------------------------
+
+ui <- fluidPage(
+  leafletOutput("mymap",height = 1000)
+)
+
+#---------------------------------------server.R------------------------------------
+
+server <- function(input,output, session){
+  
+  data <- reactive({
+    x <- df
+  })
+  
+  output$mymap <- renderLeaflet({
+    df <- data()
+    
+    # Create a palette that maps factor levels to colors
+    pal <- colorFactor(c("red", "yellow"), domain = c("Binnenhaven", "Zee- en binnenvaart"))
+    
+    m <- leaflet(data = df) %>% 
+      addTiles() %>%
+      addCircleMarkers(
+        #radius = ~ifelse(Categorie == "Binnenhaven", 6, 10),
+        color = ~pal(Categorie),
+        stroke = FALSE, fillOpacity = 1,
+        label = ~Categorie
+      )
+    
+    m
+  })
+}
