@@ -30,4 +30,10 @@ tijd_aan_ligplaats2 <- left_join(tijd_aan_ligplaats1, df2_Waterstanden_ETD, by =
 tijd_aan_ligplaats3 <- left_join(tijd_aan_ligplaats2, df2_Waterstanden_ATA, by = c("datumtijdstartestimate" = "ATA_datumtijd"))
 tijd_aan_ligplaats4 <- left_join(tijd_aan_ligplaats3, df2_Waterstanden_ATD, by = c("datumtijdstartestimate" = "ATD_datumtijd"))
 
-#------------------------------
+#------------------------------remove spare DB's once the join is finished--------------------------------------#
+
+rm(tijd_aan_ligplaats, tijd_aan_ligplaats1, tijd_aan_ligplaats2, tijd_aan_ligplaats3, 
+   df2_Waterstanden, df2_Waterstanden_ATA, df2_Waterstanden_ATD, df2_Waterstanden_ETA, df2_Waterstanden_ETD, 
+   df2_IRS_BERTHVISIT_HISTORY_VW, df2_IRS_BERTHVISIT_HISTORY_VW_clean, df2_IRS_BERTHVISIT_VW_clean,
+   df2_IRS_VESSELVISIT_VW_clean, filtered_movement, join_IRS_BERTHVISIT_VW, join_IRS_MOVEMENT_VW, 
+   ligplaatsen_haven_clean, ref_ship_vw_clean, df)
