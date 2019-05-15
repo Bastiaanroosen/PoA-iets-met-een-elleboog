@@ -13,41 +13,31 @@ load("~/POAdata/scripts/ingelezen.data.Rdata")
 
 movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
 movement_history_vw_clean[movement_history_vw_clean == ""] <- NA
-View(movement_history_vw_clean)
 movement_history_vw_clean2 <- na.omit(movement_history_vw_clean)
-View(movement_history_vw_clean2)
 
 #------------------------------------Ligplaatsen_Haven_Clean--------------------------------------------------------------
 
 ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
 ligplaatsen_haven_clean[ligplaatsen_haven_clean == ""] <- NA
-View(ligplaatsen_haven_clean)
 ligplaatsen_haven_clean2 <- na.omit(ligplaatsen_haven_clean)
-View(ligplaatsen_haven_clean2)
 
 #-------------------------------------Ref_Ship_VW_Clean-------------------------------------------------------------------
 
 ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
 ref_ship_vw_clean[ref_ship_vw_clean == ""] <- NA
-View(ref_ship_vw_clean)
 ref_ship_vw_clean2 <- na.omit(ref_ship_vw_clean)
-View(ref_ship_vw_clean2)
 
 #-------------------------------------Vesselvisit_VW_Clean-----------------------------------------------------------------
 
 df2_IRS_VESSELVISIT_VW_clean <- select(df2_IRS_VESSELVISIT_VW, c(UCRN, VESSELVISIT_COMM_ID, D_START, T_START, D_END, T_END, BARGE_NUMBER))
 df2_IRS_VESSELVISIT_VW_clean[df2_IRS_VESSELVISIT_VW_clean == ""] <- NA
-View(df2_IRS_VESSELVISIT_VW_clean)
 df2_IRS_VESSELVISIT_VW_clean2 <- na.omit(df2_IRS_VESSELVISIT_VW_clean)
-View(df2_IRS_VESSELVISIT_VW_clean2)
 
 #------------------------------------BERTHVISIT_HISTORY_VW_clean-----------------------------------------------------------
 
 df2_IRS_BERTHVISIT_HISTORY_VW_clean <- select (df2_IRS_BERTHVISIT_HISTORY_VW, c(BERTHVISIT_COMM_ID, BERTH_CODE, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD, D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
 df2_IRS_BERTHVISIT_HISTORY_VW_clean[df2_IRS_BERTHVISIT_HISTORY_VW_clean == ""] <- NA
-View(df2_IRS_BERTHVISIT_HISTORY_VW_clean)
 df2_IRS_BERTHVISIT_HISTORY_VW_clean2 <- na.omit(df2_IRS_BERTHVISIT_HISTORY_VW_clean)
-View(df2_IRS_BERTHVISIT_HISTORY_VW_clean2)
 
 #--------------------------------------------------------------------------------------------------------------------------
 
