@@ -11,7 +11,7 @@ load("~/POAdata/scripts/ingelezen.data.Rdata")
 
 #-------------------------------------Movement_History_VW_Clean------------------------------------------------------------
 
-movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
+movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MUTATION_TYPE, MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
 movement_history_vw_clean[movement_history_vw_clean == ""] <- NA
 movement_history_vw_clean2 <- na.omit(movement_history_vw_clean)
 
