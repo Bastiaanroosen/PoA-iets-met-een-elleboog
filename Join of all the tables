@@ -7,3 +7,27 @@ join_IRS_BERTHVISIT_VW <- left_join(df2_IRS_BERTHVISIT_VW_clean, ligplaatsen_hav
 join_IRS_MOVEMENT_VW <- left_join(filtered_movement, df2_IRS_VESSELVISIT_VW_clean, by="VESSELVISIT_COMM_ID")
 tijd_aan_ligplaats <- left_join(join_IRS_BERTHVISIT_VW, join_IRS_MOVEMENT_VW, by = c("BERTHVISIT_COMM_ID" = "BV_ARR_COMM_ID"))
 tijd_aan_ligplaats <- tijd_aan_ligplaats[complete.cases(tijd_aan_ligplaats[ , 3:6]),]
+
+#-----------------create waterstanden tables for 4x join------------------------------#
+
+df2_Waterstanden$datumtijd <- as.POSIXct(df2_Waterstanden$datumtijd)
+df2_Waterstanden_ETA <- df2_Waterstanden
+colnames(df2_Waterstanden_ETA) <- paste("ETA", colnames(df2_Waterstanden_ETA), sep = "_")
+
+df2_Waterstanden_ETD <- df2_Waterstanden
+colnames(df2_Waterstanden_ETD) <- paste("ETD", colnames(df2_Waterstanden_ETD), sep = "_")
+
+df2_Waterstanden_ATA <- df2_Waterstanden
+colnames(df2_Waterstanden_ATA) <- paste("ATA", colnames(df2_Waterstanden_ATA), sep = "_")
+
+df2_Waterstanden_ATD <- df2_Waterstanden
+colnames(df2_Waterstanden_ATD) <- paste("ATD", colnames(df2_Waterstanden_ATD), sep = "_")
+
+#------------------------------join waterstanden 4x--------------------------------------#
+
+tijd_aan_ligplaats1 <- left_join(tijd_aan_ligplaats, df2_Waterstanden_ETA, by = c("datumtijdstartestimate" = "ETA_datumtijd"))
+tijd_aan_ligplaats2 <- left_join(tijd_aan_ligplaats1, df2_Waterstanden_ETD, by = c("datumtijdstartestimate" = "ETD_datumtijd"))
+tijd_aan_ligplaats3 <- left_join(tijd_aan_ligplaats2, df2_Waterstanden_ATA, by = c("datumtijdstartestimate" = "ATA_datumtijd"))
+tijd_aan_ligplaats4 <- left_join(tijd_aan_ligplaats3, df2_Waterstanden_ATD, by = c("datumtijdstartestimate" = "ATD_datumtijd"))
+
+#------------------------------
