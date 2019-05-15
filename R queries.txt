@@ -4,29 +4,52 @@ library(DBI)
 
 load("~/POAdata/scripts/ingelezen.data.Rdata")
 
+# With these queries we 1 clean the data frames, to obtain the columns we need
+#                       2 fill all empty cell with NA
+#                       3 make a copy of the df without the NA's
 
-# With these queries we clean the data frames, to obtain the columns we need.
+
+#-------------------------------------Movement_History_VW_Clean------------------------------------------------------------
 
 movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
-
-ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
-
-ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
-
-berthvisit_history_vw <- select(df2_IRS_BERTHVISIT_HISTORY_VW, c(D_MUTATION, T_MUTATION, BERTHVISIT_COMM_ID, BERTH_NAME, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD))
-
-# Alle lege cellen in de tabel omzetten naar NA
 movement_history_vw_clean[movement_history_vw_clean == ""] <- NA
-ligplaatsen_haven_clean[ligplaatsen_haven_clean == ""] <- NA
-ref_ship_vw_clean[ref_ship_vw_clean == ""] <- NA
-
-# een object <naam_df>2 aanmaken die alle data van <naam_df> bevat zonder de NA's
+View(movement_history_vw_clean)
 movement_history_vw_clean2 <- na.omit(movement_history_vw_clean)
 View(movement_history_vw_clean2)
+
+#------------------------------------Ligplaatsen_Haven_Clean--------------------------------------------------------------
+
+ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
+ligplaatsen_haven_clean[ligplaatsen_haven_clean == ""] <- NA
+View(ligplaatsen_haven_clean)
 ligplaatsen_haven_clean2 <- na.omit(ligplaatsen_haven_clean)
 View(ligplaatsen_haven_clean2)
+
+#-------------------------------------Ref_Ship_VW_Clean-------------------------------------------------------------------
+
+ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
+ref_ship_vw_clean[ref_ship_vw_clean == ""] <- NA
+View(ref_ship_vw_clean)
 ref_ship_vw_clean2 <- na.omit(ref_ship_vw_clean)
 View(ref_ship_vw_clean2)
 
-#Hiermee kunnen wij aantal NA tellen per kolom
+#-------------------------------------Vesselvisit_VW_Clean-----------------------------------------------------------------
+
+df2_IRS_VESSELVISIT_VW_clean <- select(df2_IRS_VESSELVISIT_VW, c(UCRN, VESSELVISIT_COMM_ID, D_START, T_START, D_END, T_END, BARGE_NUMBER))
+df2_IRS_VESSELVISIT_VW_clean[df2_IRS_VESSELVISIT_VW_clean == ""] <- NA
+View(df2_IRS_VESSELVISIT_VW_clean)
+df2_IRS_VESSELVISIT_VW_clean2 <- na.omit(df2_IRS_VESSELVISIT_VW_clean)
+View(df2_IRS_VESSELVISIT_VW_clean2)
+
+#------------------------------------BERTHVISIT_HISTORY_VW_clean-----------------------------------------------------------
+
+df2_IRS_BERTHVISIT_HISTORY_VW_clean <- select (df2_IRS_BERTHVISIT_HISTORY_VW, c(BERTHVISIT_COMM_ID, BERTH_CODE, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD, D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
+df2_IRS_BERTHVISIT_HISTORY_VW_clean[df2_IRS_BERTHVISIT_HISTORY_VW_clean == ""] <- NA
+View(df2_IRS_BERTHVISIT_HISTORY_VW_clean)
+df2_IRS_BERTHVISIT_HISTORY_VW_clean2 <- na.omit(df2_IRS_BERTHVISIT_HISTORY_VW_clean)
+View(df2_IRS_BERTHVISIT_HISTORY_VW_clean2)
+
+#--------------------------------------------------------------------------------------------------------------------------
+
+#With this query we can count NA's per column
 sum(is.na(movement_history_vw_clean$BV_ARR_COMM_ID))
