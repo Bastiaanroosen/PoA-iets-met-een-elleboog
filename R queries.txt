@@ -49,3 +49,10 @@ df2_IRS_BERTHVISIT_HISTORY_VW_clean <- na.omit(df2_IRS_BERTHVISIT_HISTORY_VW_cle
 
 #With this query we can count NA's per column
 sum(is.na(movement_history_vw_clean$BV_ARR_COMM_ID))
+
+#-----------------------------------Nullen toevoegen aan het begin van een getal---------------------------------------------------------
+
+library(stringr)
+df2_binnenvaartschepen$ENI_Nummer <- str_pad(df2_binnenvaartschepen$ENI_Nummer, 8, pad = "0")
+View(df2_binnenvaartschepen$ENI_Nummer)
+#----------------------------------------------------------------------------------------------------------------------------
