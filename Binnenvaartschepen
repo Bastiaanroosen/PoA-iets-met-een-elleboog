@@ -1,0 +1,4 @@
+#----------------------------------------Binnenvaartschepen--------------------------------------------------------------
+
+df2_binnenvaartschepen$ENI_Nummer <- ifelse(df2_binnenvaartschepen$ENI_Nummer == "", df2_binnenvaartschepen$EU_Nummer, df2_binnenvaartschepen$ENI_Nummer)
+df2_binnenvaartschepen <- select (df2_binnenvaartschepen, -c(EU_Nummer))
