@@ -1,4 +1,4 @@
-# --------------------------- # Inlezen data --------------------------------------------------------------------------------------------------------------------------------
+#--------------------------- # Inlezen data --------------------------------------------------------------------------------------------------------------------------------
 
 #In deze file zullen de tabellen worden ingelezen en in een dataframe worden geplaatst
 
@@ -52,17 +52,19 @@ RMySQL::dbDisconnect(dbConn)
 # --------------------------- # Remove any useless dataframes --------------------------------------------------------------------------------------------------------------------------------
 
 #remove unnecessary tables
-rm(df2_IRS_ANNOUNCEMENT_VW, df2_IRS_BERTHVISIT_VW, df2_IRS_CARGO_ABOARD_VW, 
+rm(df2_IRS_ANNOUNCEMENT_VW, df2_IRS_CARGO_ABOARD_VW, 
    df2_IRS_LOCKCOMPLEX_VISIT_VW,    df2_IRS_LOCKTURN_RECREATIONAL_VW, 
    df2_IRS_LOCKTURN_VW, df2_IRS_PASSAGE_CROSSING_VW, 
-   df2_IRS_PREVIOUS_PORT_VW, df2_IRS_REF_IMDG_VW, df2_IRS_REF_BERTH_VW)
-   
-   
+   df2_IRS_PREVIOUS_PORT_VW, df2_IRS_REF_IMDG_VW, df2_IRS_REF_BERTH_VW, df2_KNMI_WEERDATA_SCHIPHOL)
+
+
 # ---------------------------------- Clean VESSELVISIT -----------------------------------------------#
 
 
 #select, clean and copy
 df2_IRS_VESSELVISIT_VW_clean <- select(df2_IRS_VESSELVISIT_VW, c(UCRN, VESSELVISIT_COMM_ID, D_START, T_START, D_END, T_END, BARGE_NUMBER))
+df2_IRS_VESSELVISIT_VW_clean[df2_IRS_VESSELVISIT_VW_clean == ""] <- NA
+#df2_IRS_VESSELVISIT_VW_clean <- na.omit(df2_IRS_VESSELVISIT_VW_clean)
 
 #create date-time start column
 df2_IRS_VESSELVISIT_VW_clean <- mutate(df2_IRS_VESSELVISIT_VW_clean, datumtijdstart = paste(D_START, T_START, sep = " "))
@@ -77,48 +79,66 @@ df2_IRS_VESSELVISIT_VW_clean$datumtijdend <- round_date(df2_IRS_VESSELVISIT_VW_c
 df2_IRS_VESSELVISIT_VW_clean <- select (df2_IRS_VESSELVISIT_VW_clean, -c(D_START, T_START, D_END, T_END))
 rm(df2_IRS_VESSELVISIT_VW)
 
-# ---------------------------------- Create date-time BERTHVISIT_HISTORY_VW -----------------------------------------------#
+# ---------------------------------- Create date-time BERTHVISIT_VW -----------------------------------------------#
 
 
+df2_IRS_BERTHVISIT_VW_clean <- select (df2_IRS_BERTHVISIT_VW, c(BERTHVISIT_COMM_ID, BERTH_CODE, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD, D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
 df2_IRS_BERTHVISIT_HISTORY_VW_clean <- select (df2_IRS_BERTHVISIT_HISTORY_VW, c(BERTHVISIT_COMM_ID, BERTH_CODE, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD, D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
+df2_IRS_BERTHVISIT_VW_clean <- rbind(df2_IRS_BERTHVISIT_HISTORY_VW_clean, df2_IRS_BERTHVISIT_VW_clean)
+df2_IRS_BERTHVISIT_VW_clean[df2_IRS_BERTHVISIT_VW_clean == ""] <- NA
+#df2_IRS_BERTHVISIT_VW_clean <- na.omit(df2_IRS_BERTHVISIT_VW_clean)
+
+
 #create date-time start estimate column
-df2_IRS_BERTHVISIT_HISTORY_VW_clean <- mutate(df2_IRS_BERTHVISIT_HISTORY_VW_clean, datumtijdstartestimate = paste(D_BERTH_ETA, T_BERTH_ETA, sep = " "))
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartestimate <- as.POSIXct(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartestimate, tz ="Etc/GMT+1", "%Y%m%d %H%M")
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartestimate <- round_date(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartestimate, unit = "10 minutes")
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdstartestimate = paste(D_BERTH_ETA, T_BERTH_ETA, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate, unit = "10 minutes")
 
 
 #create date-time end estimate column
-df2_IRS_BERTHVISIT_HISTORY_VW_clean <- mutate(df2_IRS_BERTHVISIT_HISTORY_VW_clean, datumtijdendestimate = paste(D_BERTH_ETD, T_BERTH_ETD, sep = " "))
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendestimate <- as.POSIXct(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendestimate, tz ="Etc/GMT+1", "%Y%m%d %H%M")
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendestimate <- round_date(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendestimate, unit = "10 minutes")
-df2_IRS_BERTHVISIT_HISTORY_VW_clean <- select (df2_IRS_BERTHVISIT_HISTORY_VW_clean, -c(D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD))
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdendestimate = paste(D_BERTH_ETD, T_BERTH_ETD, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate, unit = "10 minutes")
+df2_IRS_BERTHVISIT_VW_clean <- select (df2_IRS_BERTHVISIT_VW_clean, -c(D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD))
 
 
 #create date-time start actual column
-df2_IRS_BERTHVISIT_HISTORY_VW_clean <- mutate(df2_IRS_BERTHVISIT_HISTORY_VW_clean, datumtijdstartactual = paste(D_BERTH_ATA, T_BERTH_ATA, sep = " "))
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartactual <- as.POSIXct(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartactual, tz ="Etc/GMT+1", "%Y%m%d %H%M")
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartactual <- round_date(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdstartactual, unit = "10 minutes")
-
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdstartactual = paste(D_BERTH_ATA, T_BERTH_ATA, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual, unit = "10 minutes")
 
 #create date-time end actual column
-df2_IRS_BERTHVISIT_HISTORY_VW_clean <- mutate(df2_IRS_BERTHVISIT_HISTORY_VW_clean, datumtijdendactual = paste(D_BERTH_ATD, T_BERTH_ATD, sep = " "))
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendactual <- as.POSIXct(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendactual, tz ="Etc/GMT+1", "%Y%m%d %H%M")
-df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendactual <- round_date(df2_IRS_BERTHVISIT_HISTORY_VW_clean$datumtijdendactual, unit = "10 minutes")
-df2_IRS_BERTHVISIT_HISTORY_VW_clean <- select (df2_IRS_BERTHVISIT_HISTORY_VW_clean, -c(D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
-rm(df2_IRS_BERTHVISIT_HISTORY_VW)
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdendactual = paste(D_BERTH_ATD, T_BERTH_ATD, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual, unit = "10 minutes")
+df2_IRS_BERTHVISIT_VW_clean <- select (df2_IRS_BERTHVISIT_VW_clean, -c(D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
+rm(df2_IRS_BERTHVISIT_VW)
 
 #------------------------CLEAN MOVEMENT, Ligplaatsen en REF_SHIP_VW and Remove unnecessary---------------------#
 
+#-------------------------------------Movement_History_VW_Clean------------------------------------------------------------
+
 movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MUTATION_TYPE, MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
+movement_history_vw_clean[movement_history_vw_clean == ""] <- NA
+#movement_history_vw_clean <- na.omit(movement_history_vw_clean)
 movement_vw_clean <- select(df2_IRS_MOVEMENT_VW, c(MUTATION_TYPE, MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
 movement_total <- rbind(movement_vw_clean, movement_history_vw_clean)
 filtered_movement <- filter(movement_total, movement_total$MUTATION_TYPE == "CREATED")
+#filtered_movement$BV_ARR_COMM_ID <- as.numeric(filtered_movement$BV_ARR_COMM_ID)
 rm(df2_IRS_MOVEMENT_HISTORY_VW, df2_IRS_MOVEMENT_VW, movement_vw_clean, movement_history_vw_clean, movement_total)
 
+#------------------------------------Ligplaatsen_Haven_Clean--------------------------------------------------------------
+
 ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
+ligplaatsen_haven_clean[ligplaatsen_haven_clean == ""] <- NA
+#ligplaatsen_haven_clean <- na.omit(ligplaatsen_haven_clean)
 rm(ligplaatsen_haven)
 
+#-------------------------------------Ref_Ship_VW_Clean-------------------------------------------------------------------
+
 ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
+ref_ship_vw_clean[ref_ship_vw_clean == ""] <- NA
+#ref_ship_vw_clean <- na.omit(ref_ship_vw_clean)
 rm(df2_IRS_REF_SHIP_VW)
 
-#------------------------
+#----------------------------------------
