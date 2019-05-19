@@ -1,0 +1,6 @@
+df2_binnenvaartschepen <- select (df2_binnenvaartschepen,-c(URL,Voortstuwing))
+
+df2_binnenvaartschepen$Lengte <- gsub("[^0-9]", "", df2_binnenvaartschepen$Lengte)
+df2_binnenvaartschepen$Breedte <- gsub("[^0-9]", "", df2_binnenvaartschepen$Breedte)
+df2_binnenvaartschepen$Diepgang <- gsub("[^0-9]", "", df2_binnenvaartschepen$Diepgang)
+df2_binnenvaartschepen$Tonnage <- gsub("[^0-9]", "", df2_binnenvaartschepen$Tonnage)
