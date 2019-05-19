@@ -16,6 +16,7 @@ library(RMySQL)
 library(dplyr)
 library(lubridate)
 library(stringr)
+library(stringi)
 
 # --------------------------- # Tabellen POA_HaMIS_DWH inladen --------------------------------------------------------------------------------------------------------------------------------
 
@@ -129,10 +130,31 @@ filtered_movement <- filter(movement_total, movement_total$MUTATION_TYPE == "CRE
 rm(df2_IRS_MOVEMENT_HISTORY_VW, df2_IRS_MOVEMENT_VW, movement_vw_clean, movement_history_vw_clean, movement_total)
 
 #------------------------------------Ligplaatsen_Haven_Clean--------------------------------------------------------------
+# Join ligplaatstabellen 
 
-ligplaatsen_haven_clean <- select(ligplaatsen_haven, c(Ligplaatscode, Verkorte_Ligplaatsnaam, Haven_Hoofdvaarweg, Havenbekken, X_Hamis, Y_Hamis))
-ligplaatsen_haven_clean[ligplaatsen_haven_clean == ""] <- NA
-#ligplaatsen_haven_clean <- na.omit(ligplaatsen_haven_clean)
+joinligplaatsen <- full_join(df2_longlat_havens_correct, ligplaatsen_haven, by = "Ligplaatscode", suffix = c(".ll", ".ou"))
+
+# Select relevante kolommen
+
+ligplaatsen_haven_clean <- select(joinligplaatsen, Ligplaatscode, Ligplaatsnaam.ll, Categorie, Latitude, Longitude, Ligplaats_Type, Haven_Hoofdvaarweg, Havenbekken)
+
+# insert na waar van toepassing
+ligplaatsen_haven_clean[ligplaatsen_haven_clean== ""] <- NA
+
+# verwijder .ll bij ligplaatsnaam 
+colnames(ligplaatsen_haven_clean)[colnames(ligplaatsen_haven_clean)=="Ligplaatsnaam.ll"] <- "Ligplaatsnaam"
+
+# corrigeer foutief ingelezen Long en Lats
+ligplaatsen_haven_clean$Longitude <- as.numeric(ligplaatsen_haven_clean$Longitude)
+
+stri_sub(ligplaatsen_haven_clean$Longitude, 2, 1) <- "."
+stri_sub(ligplaatsen_haven_clean$Latitude, 3,2) <- "."
+
+ligplaatsen_haven_clean$Longitude <- as.double(ligplaatsen_haven_clean$Longitude)
+ligplaatsen_haven_clean$Latitude <- as.double(ligplaatsen_haven_clean$Latitude)
+
+view(ligplaatsen_haven_clean)
+
 rm(ligplaatsen_haven)
 
 #-------------------------------------Ref_Ship_VW_Clean-------------------------------------------------------------------
