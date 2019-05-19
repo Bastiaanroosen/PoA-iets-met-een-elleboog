@@ -53,6 +53,7 @@ sum(is.na(movement_history_vw_clean$BV_ARR_COMM_ID))
 #-----------------------------------Nullen toevoegen aan het begin van een getal---------------------------------------------------------
 
 library(stringr)
+df2_binnenvaartschepen <- df2_binnenvaartschepen[complete.cases(df2_binnenvaartschepen[ , 3]),]
 df2_binnenvaartschepen$ENI_Nummer <- str_pad(df2_binnenvaartschepen$ENI_Nummer, 8, pad = "0")
-View(df2_binnenvaartschepen$ENI_Nummer)
+
 #----------------------------------------------------------------------------------------------------------------------------
