@@ -256,3 +256,4 @@ waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM > 100] = "VERY HIG
 
 # get rid of any boolean columns
 waterstanden1 <-as.data.frame(waterstanden1)
+waterstanden1 <- select(waterstanden1, -c(ID ))
