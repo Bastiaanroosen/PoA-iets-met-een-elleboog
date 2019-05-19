@@ -141,4 +141,7 @@ ref_ship_vw_clean[ref_ship_vw_clean == ""] <- NA
 #ref_ship_vw_clean <- na.omit(ref_ship_vw_clean)
 rm(df2_IRS_REF_SHIP_VW)
 
-#----------------------------------------
+#----------------------------------------Binnenvaartschepen--------------------------------------------------------------
+
+df2_binnenvaartschepen$ENI_Nummer <- ifelse(df2_binnenvaartschepen$ENI_Nummer == "", df2_binnenvaartschepen$EU_Nummer, df2_binnenvaartschepen$ENI_Nummer)
+df2_binnenvaartschepen <- select (df2_binnenvaartschepen, -c(EU_Nummer))
