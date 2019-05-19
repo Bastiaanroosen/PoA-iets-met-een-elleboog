@@ -1,0 +1,3 @@
+#Verwijder regels zonder scheepsnaam en scheepsnaam 59 ton
+df2_binnenvaartschepen <- df2_binnenvaartschepen[!(df2_binnenvaartschepen$Scheepsnaam == ""), ]
+df2_binnenvaartschepen <- df2_binnenvaartschepen[!(df2_binnenvaartschepen$Scheepsnaam == "59 ton"), ]
