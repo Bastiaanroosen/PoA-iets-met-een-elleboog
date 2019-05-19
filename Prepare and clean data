@@ -175,6 +175,16 @@ df2_binnenvaartschepen$ENI_Nummer[df2_binnenvaartschepen$ENI_Nummer == ""] <- NA
 df2_binnenvaartschepen <- df2_binnenvaartschepen[complete.cases(df2_binnenvaartschepen[ , 3]),]
 df2_binnenvaartschepen$ENI_Nummer <- str_pad(df2_binnenvaartschepen$ENI_Nummer, 8, pad = "0")
 
+#------------------------------------------------------------------------------------------------------------------------
+#Delete kolom URL en voortstuwing
+df2_binnenvaartschepen <- select (df2_binnenvaartschepen,-c(URL,Voortstuwing))
+
+#Delete alles wat niet cijfers zijn
+df2_binnenvaartschepen$Lengte <- gsub("[^0-9]", "", df2_binnenvaartschepen$Lengte)
+df2_binnenvaartschepen$Breedte <- gsub("[^0-9]", "", df2_binnenvaartschepen$Breedte)
+df2_binnenvaartschepen$Diepgang <- gsub("[^0-9]", "", df2_binnenvaartschepen$Diepgang)
+
+
 #--------------------------Waterstanden categoriseren  ------------------------------------------------------------------
 # create new df 
 waterstanden1 <- df2_Waterstanden
