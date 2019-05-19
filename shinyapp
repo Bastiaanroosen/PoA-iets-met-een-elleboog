@@ -1,0 +1,166 @@
+# Hiervoor een project opstarten in R. Hierin 4 scriptjes openen. Eerst process.R draaien, dan vanuit ui.R de app starten. 
+
+#########################################
+#               Process.R
+#########################################
+
+# Laden van de packages
+library(DBI)
+library(RMySQL)
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(stringi)
+
+# database: POA_HaMIS_DWH
+# Database connection string 
+dbConn <- dbConnect(
+  MySQL(),
+  user="POAproject",
+  password="DBpass2PoAdam4PoaGrp",
+  dbname='POA_HaMIS_DWH',
+  host='127.0.0.1'
+)
+
+# Toon alle tabellen in de database POA_HaMIS_DWH
+dbListTables(dbConn)
+
+#sla alle tabellen op in een dataframe met een eigen naam
+for(i in 1:length(dbListTables(dbConn))){
+  rs <- dbSendQuery(dbConn, paste0("select * from ", dbListTables(dbConn)[[i]]))
+  df<-fetch(rs, n=-1)
+  assign(paste0("df2_",dbListTables(dbConn)[[i]]), df )
+  dbClearResult(rs)
+  
+}
+
+# --------------------------- # Extra dataset inladen --------------------------------------------------------------------------------------------------------------------------------
+
+# Inladen van de extra dataset over de ligplaatsen
+library(readxl)
+ligplaatsen_haven <- read_excel("~/POAdata/scripts/ligplaatsen-haven.xlsx")
+
+#verbreek de connectie
+RMySQL::dbDisconnect(dbConn)
+
+#------------------------------------Ligplaatsen_Haven_Clean--------------------------------------------------------------
+# Join ligplaatstabellen 
+
+joinligplaatsen <- full_join(df2_longlat_havens_correct, ligplaatsen_haven, by = "Ligplaatscode", suffix = c(".ll", ".ou"))
+
+# Select relevante kolommen
+
+ligplaatsen_haven_clean <- select(joinligplaatsen, Ligplaatscode, Ligplaatsnaam.ll, Categorie, Latitude, Longitude, Ligplaats_Type, Haven_Hoofdvaarweg, Havenbekken)
+
+# insert na waar van toepassing
+ligplaatsen_haven_clean[ligplaatsen_haven_clean== ""] <- NA
+
+# verwijder .ll bij ligplaatsnaam 
+colnames(ligplaatsen_haven_clean)[colnames(ligplaatsen_haven_clean)=="Ligplaatsnaam.ll"] <- "Ligplaatsnaam"
+
+# corrigeer foutief ingelezen Long en Lats
+ligplaatsen_haven_clean$Longitude <- as.numeric(ligplaatsen_haven_clean$Longitude)
+
+stri_sub(ligplaatsen_haven_clean$Longitude, 2, 1) <- "."
+stri_sub(ligplaatsen_haven_clean$Latitude, 3,2) <- "."
+
+ligplaatsen_haven_clean$Longitude <- as.double(ligplaatsen_haven_clean$Longitude)
+ligplaatsen_haven_clean$Latitude <- as.double(ligplaatsen_haven_clean$Latitude)
+
+######################################################
+#  Server.R
+######################################################
+
+server <- function(input,output, session){
+  
+  data <- reactive({
+    x <- ligplaatsen_haven_clean
+  })
+  
+  output$mymap <- renderLeaflet({
+    df <- data()
+    
+    # create a reactive value that will store the click position
+    # data_of_click <- reactiveValues(clickedMarker=NULL)
+    
+    
+    # Create a palette that maps factor levels to colors
+    pal <- colorFactor(c("red", "yellow", "blue"), domain = c("Binnenvaart", "Zee- en binnenvaart", "Meetpunt"))
+    
+    # give the map a spot for a title   
+    tag.map.title <- tags$style(HTML("
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 50%;
+    text-align: center;
+    padding-left: 10px; 
+    padding-right: 10px; 
+    background: rgba(255,255,255,0.75);
+    font-weight: bold;
+    font-size: 28px;
+  }
+"))
+    # insert title here 
+    title <- tags$div(
+      tag.map.title, HTML("Ligplaatsen en Watermeetpunten")
+    )  
+    
+    # generate the map
+    m <- leaflet(data = df) %>% 
+      addTiles() %>%
+      addCircleMarkers(
+        #radius = ~ifelse(Categorie == "Binnenhaven", 6, 10),
+        color = ~pal(Categorie),
+        stroke = FALSE, fillOpacity = 1,
+        label = ~Categorie
+      ) %>%
+      addControl(title, position = "topleft", className="map-title") %>%
+      addLegend(pal = pal, values = ~Categorie, group = "circles", position = "topright")
+    
+    # store the click
+    #  observeEvent(input$map_marker_click,{
+    #   data_of_click$clickedMarker <- input$map_marker_click
+    
+    # Make a barplot or scatterplot depending of the selected point
+    #    output$plot=renderPlot({
+    #     my_place=data_of_click$clickedMarker$id
+    #    if(is.null(my_place)){my_place="place1"}
+    #   if(my_place=="place1"){
+    #    plot(rnorm(1000), col=rgb(0.9,0.4,0.1,0.3), cex=3, pch=20)
+    # }else{
+    #  barplot(rnorm(10), col=rgb(0.1,0.4,0.9,0.3))
+    
+    
+    m
+    
+  })
+  
+  
+}
+
+###############################################
+#           Global.R
+###############################################
+
+# load required libraries
+
+library(shiny)
+library(leaflet)
+library(dplyr)
+
+
+
+# used sources 
+# https://medium.com/@joyplumeri/how-to-make-interactive-maps-in-r-shiny-brief-tutorial-c2e1ef0447da
+# https://www.datascience.com/blog/beginners-guide-to-shiny-and-leaflet-for-interactive-mapping
+# https://rstudio.github.io/leaflet/markers.html
+
+#################################################
+#            ui.R
+#################################################
+
+ui <- fluidPage(
+  leafletOutput("mymap",height = 1000)
+)
+
