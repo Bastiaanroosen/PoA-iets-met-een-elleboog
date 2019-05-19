@@ -175,6 +175,9 @@ df2_binnenvaartschepen$ENI_Nummer[df2_binnenvaartschepen$ENI_Nummer == ""] <- NA
 df2_binnenvaartschepen <- df2_binnenvaartschepen[complete.cases(df2_binnenvaartschepen[ , 3]),]
 df2_binnenvaartschepen$ENI_Nummer <- str_pad(df2_binnenvaartschepen$ENI_Nummer, 8, pad = "0")
 
+#selecteer alleen de meest recente versie van elke ENI_Nummer
+df2_binnenvaartschepen_test <- setDT(df2_binnenvaartschepen)[,.SD[which.max(Bouwjaar)],keyby=ENI_Nummer]
+
 #------------------------------------------------------------------------------------------------------------------------
 #Delete kolom URL en voortstuwing
 df2_binnenvaartschepen <- select (df2_binnenvaartschepen,-c(URL,Voortstuwing))
