@@ -1,0 +1,17 @@
+####################################
+#  Categoriseer binnenvaartschepen
+####################################
+
+# creëer nieuwe tabel (oude is back up)
+bschepen <- df2_binnenvaartschepen
+
+types <- as.data.frame(table(bschepen$Scheepstype))
+
+vrachttypes <- c("Kraan & overslagschip", "Motorbeunschip", "Motortankschip", "Motorvrachtschip", "Poedertanker")
+pleziertypes <- c("Cruiseschip", "Passagiersschip")
+
+bschepen$Type_Vaart [bschepen$Scheepstype == vrachttypes] = "vracht"
+bschepen$Type_Vaart [bschepen$Scheepstype == pleziertypes] = "pleziervaart"
+
+did_it_work <- as.data.frame(table(bschepen$Type_Vaart))
+view(did_it_work)
