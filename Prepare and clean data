@@ -147,7 +147,8 @@ rm(df2_IRS_REF_SHIP_VW)
 df2_binnenvaartschepen$ENI_Nummer <- ifelse(df2_binnenvaartschepen$ENI_Nummer == "", df2_binnenvaartschepen$EU_Nummer, df2_binnenvaartschepen$ENI_Nummer)
 df2_binnenvaartschepen <- select (df2_binnenvaartschepen, -c(EU_Nummer))
 
-#---------------------------Lege velden uit en nullen plaatsen voor ENI nummer om tot 8 cijfers aan te vullen---------
+#---------------------------Lege velden uit en nullen plaatsen voor ENI nummer om tot 8 cijfers aan te vullen-----------
 
+df2_binnenvaartschepen$ENI_Nummer[df2_binnenvaartschepen$ENI_Nummer == ""] <- NA
 df2_binnenvaartschepen <- df2_binnenvaartschepen[complete.cases(df2_binnenvaartschepen[ , 3]),]
 df2_binnenvaartschepen$ENI_Nummer <- str_pad(df2_binnenvaartschepen$ENI_Nummer, 8, pad = "0")
