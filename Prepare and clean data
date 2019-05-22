@@ -201,10 +201,10 @@ df2_binnenvaartschepen$Breedte <- gsub("[^0-9]", "", df2_binnenvaartschepen$Bree
 df2_binnenvaartschepen$Diepgang <- gsub("[^0-9]", "", df2_binnenvaartschepen$Diepgang)
 df2_binnenvaartschepen$Tonnage <- gsub("[^0-9]", "", df2_binnenvaartschepen$Tonnage)
 
-#Verwijder regels zonder scheepsnaam en scheepsnaam 59 ton
-df2_binnenvaartschepen <- df2_binnenvaartschepen[!(df2_binnenvaartschepen$Scheepsnaam == ""), ]
+#Verwijder regels zonder scheepsnaam, scheepsnaam 59 ton, schepen verwijderd die niet interessant zijn
+df2_binnenvaartschepen$Scheepsnaam <- na.omit(df2_binnenvaartschepen$Scheepsnaam)
 df2_binnenvaartschepen <- df2_binnenvaartschepen[!(df2_binnenvaartschepen$Scheepsnaam == "59 ton"), ]
-
+df2_binnenvaartschepen$Type_Vaart <- na.omit(df2_binnenvaartschepen$Type_Vaart)
 
 #---------------------------Categoriseer binnenvaartschepen---------------------------------------------------------------
 df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Kraan & overslagschip"] = "vracht"
