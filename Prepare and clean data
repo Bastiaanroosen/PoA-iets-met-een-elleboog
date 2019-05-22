@@ -17,6 +17,7 @@ library(dplyr)
 library(lubridate)
 library(stringr)
 library(stringi)
+library(data.table)
 
 # --------------------------- # Tabellen POA_HaMIS_DWH inladen --------------------------------------------------------------------------------------------------------------------------------
 
