@@ -193,6 +193,16 @@ df2_binnenvaartschepen <- df2_binnenvaartschepen[!(df2_binnenvaartschepen$Scheep
 df2_binnenvaartschepen <- df2_binnenvaartschepen[!(df2_binnenvaartschepen$Scheepsnaam == "59 ton"), ]
 
 
+#---------------------------Categoriseer binnenvaartschepen---------------------------------------------------------------
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Kraan & overslagschip"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Motorbeunschip"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Motortankschip"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Poedertanker"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Motorvrachtschip"] = "vracht"
+
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Cruiseschip"] = "pleziervaart"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Passagiersschip"] = "pleziervaart"
+
 #--------------------------Waterstanden categoriseren  ------------------------------------------------------------------
 # create new df 
 waterstanden1 <- df2_Waterstanden
