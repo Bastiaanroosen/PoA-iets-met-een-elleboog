@@ -85,6 +85,15 @@ df2_IRS_VESSELVISIT_VW_clean <- select (df2_IRS_VESSELVISIT_VW_clean, -c(D_START
 df2_IRS_VESSELVISIT_VW_clean$hoursberth <- difftime(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, units = "hours")
 df2_IRS_VESSELVISIT_VW_clean <- df2_IRS_VESSELVISIT_VW_clean[which(df2_IRS_VESSELVISIT_VW_clean$hoursberth > 0),]
 rm(df2_IRS_VESSELVISIT_VW)
+
+#--------------------------------------Adding weekdays---------------------------------------------
+df2_IRS_VESSELVISIT_VW_clean$week_day_start <- as.Date(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart)
+df2_IRS_VESSELVISIT_VW_clean$week_day_start <- wday(df2_IRS_VESSELVISIT_VW_clean$week_day_start, label=TRUE, abbr=FALSE)
+
+df2_IRS_VESSELVISIT_VW_clean$week_day_end <- as.Date(df2_IRS_VESSELVISIT_VW_clean$datumtijdend)
+df2_IRS_VESSELVISIT_VW_clean$week_day_end <- wday(df2_IRS_VESSELVISIT_VW_clean$week_day_end, label=TRUE, abbr=FALSE)
+
+
 # ---------------------------------- Create date-time BERTHVISIT_VW -----------------------------------------------#
 
 
