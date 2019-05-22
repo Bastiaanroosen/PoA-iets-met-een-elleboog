@@ -1,0 +1,44 @@
+# source: https://rpubs.com/riazakhan94/naive_bayes_classifier_e1071
+
+# load libraries
+library(caret)
+library(e1071)
+
+# prep data for naive bayes
+df <- Binnenvaartjoin3
+df$hoursberth <- as.numeric(Binnenvaartjoin3$hoursberth)
+
+# outliers 
+duration = df$hoursberth     
+quantile(duration, c(.32, .57, .99)) 
+
+df2 <- df
+# resultaat, 99th percentile ligt bij 195.333, afgerond op 200 nemen we iets meer dan 99 procent mee, de rest is outlier
+df2 <- df2[which(df2$hoursberth <= 200),]
+
+# zoom in on vessel visits shorter than 50 hours
+
+df3 <- df2
+
+df3 <- df3[which(df2$hoursberth <= 50),]
+df3 <- df3[which(df3$Type_Vaart != "vracht"),]
+
+mean(df3$hoursberth)
+histogram(df3$hoursberth)
+
+# remove NAs
+df2 <- na.omit(df2)
+
+# create training and test set
+set.seed(7267166)
+trainIndex=createDataPartition(df$Type_Vaart, p=0.7)$Resample1
+train=df[trainIndex, ]
+test=df[-trainIndex, ]
+
+## check the balance
+print(table(df$Type_Vaart))
+print(table(train$Type_Vaart))
+
+## create classifier
+NBclassfier=naiveBayes(Type_Vaart~, data=train)
+print(NBclassfier)
