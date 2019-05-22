@@ -17,5 +17,6 @@ Binnenvaartjoin1 <- left_join(df2_IRS_VESSELVISIT_VW_clean, df2_binnenvaartschep
 Binnenvaartjoin2 <- left_join(Binnenvaartjoin1, df2_Waterstanden_start, by = c("datumtijdstart" = "start_datumtijd"))
 Binnenvaartjoin3 <- left_join(Binnenvaartjoin2, df2_Waterstanden_end, by = c("datumtijdend" = "end_datumtijd"))
 
+#Remove all cases without a Barge Number and Scheepsnaam
 Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$BARGE_NUMBER),]
 Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$Scheepsnaam),]
