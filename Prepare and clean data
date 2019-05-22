@@ -80,8 +80,11 @@ df2_IRS_VESSELVISIT_VW_clean <- mutate(df2_IRS_VESSELVISIT_VW_clean, datumtijden
 df2_IRS_VESSELVISIT_VW_clean$datumtijdend <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, tz ="Etc/GMT+1", "%Y%m%d %H%M")
 df2_IRS_VESSELVISIT_VW_clean$datumtijdend <- round_date(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, unit = "10 minutes")
 df2_IRS_VESSELVISIT_VW_clean <- select (df2_IRS_VESSELVISIT_VW_clean, -c(D_START, T_START, D_END, T_END))
-rm(df2_IRS_VESSELVISIT_VW)
 
+#create column number of hours at berth (date-time end -/- date-time start)
+df2_IRS_VESSELVISIT_VW_clean$hoursberth <- difftime(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, units = "hours")
+df2_IRS_VESSELVISIT_VW_clean <- df2_IRS_VESSELVISIT_VW_clean[which(df2_IRS_VESSELVISIT_VW_clean$hoursberth > 0),]
+rm(df2_IRS_VESSELVISIT_VW)
 # ---------------------------------- Create date-time BERTHVISIT_VW -----------------------------------------------#
 
 
