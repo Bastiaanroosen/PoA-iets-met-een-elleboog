@@ -166,8 +166,6 @@ stri_sub(ligplaatsen_haven_clean$Latitude, 3,2) <- "."
 ligplaatsen_haven_clean$Longitude <- as.double(ligplaatsen_haven_clean$Longitude)
 ligplaatsen_haven_clean$Latitude <- as.double(ligplaatsen_haven_clean$Latitude)
 
-view(ligplaatsen_haven_clean)
-
 rm(ligplaatsen_haven)
 
 #-------------------------------------Ref_Ship_VW_Clean-------------------------------------------------------------------
