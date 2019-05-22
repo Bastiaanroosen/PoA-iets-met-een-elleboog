@@ -13,7 +13,7 @@ colnames(df2_Waterstanden_end) <- paste("end", colnames(df2_Waterstanden_end), s
 
 #---------------------JOIN Binnenvaart met waterstanden en scheepsgegevens---------------------#
 
-Binnenvaartjoin1 <- left_join(df2_IRS_VESSELVISIT_VW_clean, df2_binnenvaartschepen_test, by = c("BARGE_NUMBER" = "ENI_Nummer"))
+Binnenvaartjoin1 <- left_join(df2_IRS_VESSELVISIT_VW_clean, df2_binnenvaartschepen, by = c("BARGE_NUMBER" = "ENI_Nummer"))
 Binnenvaartjoin2 <- left_join(Binnenvaartjoin1, df2_Waterstanden_start, by = c("datumtijdstart" = "start_datumtijd"))
 Binnenvaartjoin3 <- left_join(Binnenvaartjoin2, df2_Waterstanden_end, by = c("datumtijdend" = "end_datumtijd"))
 
