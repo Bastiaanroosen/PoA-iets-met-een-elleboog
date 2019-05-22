@@ -1,6 +1,6 @@
 #--------------------------------------Adding weekdays---------------------------------------------
 df2_IRS_VESSELVISIT_VW_clean$week_day_start <- as.Date(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart)
-df2_IRS_VESSELVISIT_VW_clean$week_day_start <- wday(df2_IRS_VESSELVISIT_VW_clean$week_day_start, label=TRUE, abbr=FALSE)
+df2_IRS_VESSELVISIT_VW_clean$week_day_start <- lubridate::wday(df2_IRS_VESSELVISIT_VW_clean$week_day_start, label=TRUE, abbr=FALSE)
 
 df2_IRS_VESSELVISIT_VW_clean$week_day_end <- as.Date(df2_IRS_VESSELVISIT_VW_clean$datumtijdend)
-df2_IRS_VESSELVISIT_VW_clean$week_day_end <- wday(df2_IRS_VESSELVISIT_VW_clean$week_day_end, label=TRUE, abbr=FALSE)
+df2_IRS_VESSELVISIT_VW_clean$week_day_end <- lubridate::wday(df2_IRS_VESSELVISIT_VW_clean$week_day_end, label=TRUE, abbr=FALSE)
