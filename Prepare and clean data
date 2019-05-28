@@ -83,7 +83,18 @@ df2_IRS_VESSELVISIT_VW_clean <- select (df2_IRS_VESSELVISIT_VW_clean, -c(D_START
 
 #create column number of hours at berth (date-time end -/- date-time start)
 df2_IRS_VESSELVISIT_VW_clean$hoursberth <- difftime(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, units = "hours")
+
+# remove vessel visits with a visit time of zero
 df2_IRS_VESSELVISIT_VW_clean <- df2_IRS_VESSELVISIT_VW_clean[which(df2_IRS_VESSELVISIT_VW_clean$hoursberth > 0),]
+
+# boats with a vessel visit longer than 200 hours are in the 100th percentile. Remove these as outliers.  
+df2_IRS_VESSELVISIT_VW_clean <- df2_IRS_VESSELVISIT_VW_clean[which(df2_IRS_VESSELVISIT_VW_clean$hoursberth < 200),]
+
+# convert time to numeric to make analysis easier
+df2_IRS_VESSELVISIT_VW_clean$hoursberth <- as.numeric(df2_IRS_VESSELVISIT_VW_clean$hoursberth)
+
+hist(df2_IRS_VESSELVISIT_VW_clean$hoursberth)
+
 rm(df2_IRS_VESSELVISIT_VW)
 
 #--------------------------------------Adding weekdays---------------------------------------------
