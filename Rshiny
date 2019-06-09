@@ -1,0 +1,31 @@
+## app.R ##
+library(shiny)
+library(shinydashboard)
+
+#Jurgen 4) Als gebruiker wil ik kunnen zien wat de invloed is van de waterstanden op de ligtijd, 
+#zodat ik weet of en zo ja wanneer ik er rekening mee moet houden dat boten een grotere kans hebben op vertraging.
+
+ui <- dashboardPage(
+  dashboardHeader(title = "POA Ligtijden"),
+  dashboardSidebar(
+    
+  ),
+  dashboardBody(
+    fluidRow(
+      box(plotlyOutput("tijd")), box(plotOutput("water"))
+    ),
+    
+    fluidRow(box(sliderInput("urensl", "Tijd in uren", 1,24,6,1)))
+  )
+)
+
+server <- function(input, output) {
+  output$tijd <- renderPlotly({
+  water  <- ggplot(joinligplaatsen, aes(joinligplaatsen$Ligplaatscode, joinligplaatsen$Plaats), (input$urensl)) + geom_point()
+  })
+#  output$water <- renderPlotly({
+#    water  <- ggplot(df2_IRS_VESSELVISIT_VW_clean, aes(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, df2_IRS_VESSELVISIT_VW_clean$datumtijdend), (input$urensl)) + geom_point()
+#  })
+}
+
+shinyApp(ui, server)
