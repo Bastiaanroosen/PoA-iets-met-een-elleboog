@@ -1,0 +1,37 @@
+library(dplyr)
+
+bvStartDate <- as.POSIXct("2018-01-01 00:00:00")
+bvEndDate <- as.POSIXct("2019-01-01 00:00:00")
+
+date1 <- filter(Binnenvaartjoin3, Binnenvaartjoin3$datumtijdstart > bvStartDate)
+date2 <- filter(date1, date1$datumtijdstart < bvEndDate)
+
+# Maak nieuwe DF voor visual.
+Binnenvaartvisual <- select(date1, c(BARGE_NUMBER, Scheepsnaam,Bouwjaar, Scheepstype, Type_Vaart, Tonnage, Lengte, Breedte, Diepgang,datumtijdstart, datumtijdend,hoursberth))
+Binnenvaartvisual$Inhoud = as.numeric(Binnenvaartvisual$Breedte)*as.numeric(Binnenvaartvisual$Lengte)*as.numeric(Binnenvaartvisual$Diepgang)
+
+# Categoriseer de grootte van boten in 10 categorien A t/m J. 
+quantile(Binnenvaartvisual$Inhoud, c(0,.10, .20, .30, .40,.50,.60,.70,.80,.90,1),na.rm = TRUE) 
+Binnenvaartvisual$inhoudcat <- Binnenvaartvisual$Inhoud
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud < 130658600] = "A"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 130658600 & Binnenvaartvisual$Inhoud < 552960000] = "B"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 552960000 & Binnenvaartvisual$Inhoud < 1037142720] = "C"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 1037142720 & Binnenvaartvisual$Inhoud < 1412327000] = "D"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 1412327000 & Binnenvaartvisual$Inhoud < 1918473700] = "E"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 1918473700 & Binnenvaartvisual$Inhoud < 2430479088] = "F"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 2430479088 & Binnenvaartvisual$Inhoud < 3171893250] = "G"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 3171893250 & Binnenvaartvisual$Inhoud < 4292942775] = "H"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 4292942775 & Binnenvaartvisual$Inhoud < 4660150000] = "I"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 4660150000] = "J"
+table(Binnenvaartvisual$inhoudcat)
+
+# Creer data frame
+variety=rep(LETTERS[1:10], each=40)
+treatment=rep(c("high","low"),each=20)
+note=seq(1:280)+sample(1:150, 280, replace=T)
+data=data.frame(Inhoud Cat., Type ,  hoursberth)
+# Gegroepeerde boxplot
+ggplot(Binnenvaartvisual, aes(x=inhoudcat, y=hoursberth, fill=Type_Vaart)) + 
+  geom_boxplot(outlier.shape = NA) +
+# Maak gemiddelde
+  stat_summary(fun.y=mean, geom="point", shape=23, size=2)
