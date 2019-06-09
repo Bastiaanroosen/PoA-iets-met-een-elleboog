@@ -1,0 +1,4 @@
+#arrange
+Binnenvaartjoin3<- Binnenvaartjoin3 %>% arrange(Binnenvaartjoin3$start_WAARNEMINGDATUM)
+#subset
+Binnenvaartjoin3_small <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-01-01 00:00:00"))
