@@ -1,0 +1,19 @@
+library(dplyr)
+library(ggplot2)
+
+bvStartDate <- as.POSIXct("2018-01-01 00:00:00")
+bvEndDate <- as.POSIXct("2019-01-01 00:00:00")
+
+date1 <- filter(Binnenvaartjoin3, Binnenvaartjoin3$datumtijdstart > bvStartDate)
+date2 <- filter(date1, date1$datumtijdstart < bvEndDate)
+
+dates <- as.data.frame(seq.POSIXt(min(bvStartDate), max(bvEndDate), by = 600) )
+colnames(dates)[colnames(dates)=="seq.POSIXt(min(bvStartDate), max(bvEndDate), by = 600)"] <- "date"
+
+dates$count <- NA
+dates$averageberth <- NA
+
+dates$count <- 
+  sapply(dates$date, function(x)
+    sum(as.Date(date2$datumtijdstart) < as.Date(x) &
+          as.Date(date2$datumtijdend) > as.Date(x)))
