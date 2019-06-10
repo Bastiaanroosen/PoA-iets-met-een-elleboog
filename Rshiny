@@ -12,7 +12,7 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     fluidRow(
-      box(plotlyOutput("tijd")), box(plotOutput("water"))
+      box(plotlyOutput("water")), box(plotlyOutput("tijd"))
     ),
     
     fluidRow(box(sliderInput("urensl", "Tijd in uren", 1,24,6,1)))
@@ -21,11 +21,12 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
   output$tijd <- renderPlotly({
-  water  <- ggplot(joinligplaatsen, aes(joinligplaatsen$Ligplaatscode, joinligplaatsen$Plaats), (input$urensl)) + geom_point()
+    water  <- ggplot(Binnenvaartjoin3_small1, aes(Binnenvaartjoin3_small1$datumtijdstart, Binnenvaartjoin3_small1$start_HAVENMEAN)) + geom_line()
   })
-#  output$water <- renderPlotly({
-#    water  <- ggplot(df2_IRS_VESSELVISIT_VW_clean, aes(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, df2_IRS_VESSELVISIT_VW_clean$datumtijdend), (input$urensl)) + geom_point()
-#  })
+  
+  output$tijd <- renderPlotly({
+    tijden  <- ggplot(Binnenvaartjoin3_small1, aes(Binnenvaartjoin3_small1$datumtijdstart, Binnenvaartjoin3_small1$hoursberth)) + geom_line()
+  })
 }
 
 shinyApp(ui, server)
