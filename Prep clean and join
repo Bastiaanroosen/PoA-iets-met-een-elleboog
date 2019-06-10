@@ -1,0 +1,322 @@
+#--------------------------- # Inlezen data --------------------------------------------------------------------------------------------------------------------------------
+
+#In deze file zullen de tabellen worden ingelezen en in een dataframe worden geplaatst
+
+# --------------------------- # Installeer packages --------------------------------------------------------------------------------------------------------------------------------
+
+# Installeer de packages
+list.of.packages <- c("DBI",                               
+                      "RMySQL")                            
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
+
+# Laden van de packages
+library(DBI)
+library(RMySQL)
+library(dplyr)
+library(lubridate)
+library(stringr)
+library(stringi)
+library(data.table)
+
+# --------------------------- # Tabellen POA_HaMIS_DWH inladen --------------------------------------------------------------------------------------------------------------------------------
+
+# database: POA_HaMIS_DWH
+# Database connection string 
+dbConn <- dbConnect(
+  MySQL(),
+  user="POAproject",
+  password="DBpass2PoAdam4PoaGrp",
+  dbname='POA_HaMIS_DWH',
+  host='127.0.0.1'
+)
+
+# Toon alle tabellen in de database POA_HaMIS_DWH
+dbListTables(dbConn)
+
+#sla alle tabellen op in een dataframe met een eigen naam
+for(i in 1:length(dbListTables(dbConn))){
+  rs <- dbSendQuery(dbConn, paste0("select * from ", dbListTables(dbConn)[[i]]))
+  df<-fetch(rs, n=-1)
+  assign(paste0("df2_",dbListTables(dbConn)[[i]]), df )
+  dbClearResult(rs)
+  
+}
+
+# --------------------------- # Extra dataset inladen --------------------------------------------------------------------------------------------------------------------------------
+
+# Inladen van de extra dataset over de ligplaatsen
+library(readxl)
+ligplaatsen_haven <- read_excel("POAdata/scripts/ligplaatsen-haven.xlsx")
+
+#verbreek de connectie
+RMySQL::dbDisconnect(dbConn)
+
+# --------------------------- # Remove any useless dataframes --------------------------------------------------------------------------------------------------------------------------------
+
+#remove unnecessary tables
+rm(df2_IRS_ANNOUNCEMENT_VW, df2_IRS_CARGO_ABOARD_VW, 
+   df2_IRS_LOCKCOMPLEX_VISIT_VW,    df2_IRS_LOCKTURN_RECREATIONAL_VW, 
+   df2_IRS_LOCKTURN_VW, df2_IRS_PASSAGE_CROSSING_VW, 
+   df2_IRS_PREVIOUS_PORT_VW, df2_IRS_REF_IMDG_VW, df2_IRS_REF_BERTH_VW, df2_KNMI_WEERDATA_SCHIPHOL)
+
+
+# ---------------------------------- Clean VESSELVISIT -----------------------------------------------#
+
+
+#select, clean and copy
+df2_IRS_VESSELVISIT_VW_clean <- select(df2_IRS_VESSELVISIT_VW, c(UCRN, VESSELVISIT_COMM_ID, D_START, T_START, D_END, T_END, BARGE_NUMBER))
+df2_IRS_VESSELVISIT_VW_clean[df2_IRS_VESSELVISIT_VW_clean == ""] <- NA
+#df2_IRS_VESSELVISIT_VW_clean <- na.omit(df2_IRS_VESSELVISIT_VW_clean)
+
+#create date-time start column
+df2_IRS_VESSELVISIT_VW_clean <- mutate(df2_IRS_VESSELVISIT_VW_clean, datumtijdstart = paste(D_START, T_START, sep = " "))
+df2_IRS_VESSELVISIT_VW_clean$datumtijdstart <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_VESSELVISIT_VW_clean$datumtijdstart <- round_date(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, unit = "10 minutes")
+
+
+#create date-time end column
+df2_IRS_VESSELVISIT_VW_clean <- mutate(df2_IRS_VESSELVISIT_VW_clean, datumtijdend = paste(D_END, T_END, sep = " "))
+df2_IRS_VESSELVISIT_VW_clean$datumtijdend <- as.POSIXct(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_VESSELVISIT_VW_clean$datumtijdend <- round_date(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, unit = "10 minutes")
+df2_IRS_VESSELVISIT_VW_clean <- select (df2_IRS_VESSELVISIT_VW_clean, -c(D_START, T_START, D_END, T_END))
+
+#create column number of hours at berth (date-time end -/- date-time start)
+df2_IRS_VESSELVISIT_VW_clean$hoursberth <- difftime(df2_IRS_VESSELVISIT_VW_clean$datumtijdend, df2_IRS_VESSELVISIT_VW_clean$datumtijdstart, units = "hours")
+
+# remove vessel visits with a visit time of zero
+df2_IRS_VESSELVISIT_VW_clean <- df2_IRS_VESSELVISIT_VW_clean[which(df2_IRS_VESSELVISIT_VW_clean$hoursberth > 0),]
+
+# boats with a vessel visit longer than 200 hours are in the 100th percentile. Remove these as outliers.  
+df2_IRS_VESSELVISIT_VW_clean <- df2_IRS_VESSELVISIT_VW_clean[which(df2_IRS_VESSELVISIT_VW_clean$hoursberth < 200),]
+
+# convert time to numeric to make analysis easier
+df2_IRS_VESSELVISIT_VW_clean$hoursberth <- as.numeric(df2_IRS_VESSELVISIT_VW_clean$hoursberth)
+
+hist(df2_IRS_VESSELVISIT_VW_clean$hoursberth)
+
+rm(df2_IRS_VESSELVISIT_VW)
+
+#--------------------------------------Adding weekdays---------------------------------------------
+df2_IRS_VESSELVISIT_VW_clean$week_day_start <- as.Date(df2_IRS_VESSELVISIT_VW_clean$datumtijdstart)
+df2_IRS_VESSELVISIT_VW_clean$week_day_start <- lubridate::wday(df2_IRS_VESSELVISIT_VW_clean$week_day_start, label=TRUE, abbr=FALSE)
+
+df2_IRS_VESSELVISIT_VW_clean$week_day_end <- as.Date(df2_IRS_VESSELVISIT_VW_clean$datumtijdend)
+df2_IRS_VESSELVISIT_VW_clean$week_day_end <- lubridate::wday(df2_IRS_VESSELVISIT_VW_clean$week_day_end, label=TRUE, abbr=FALSE)
+
+
+# ---------------------------------- Create date-time BERTHVISIT_VW -----------------------------------------------#
+
+
+df2_IRS_BERTHVISIT_VW_clean <- select (df2_IRS_BERTHVISIT_VW, c(BERTHVISIT_COMM_ID, BERTH_CODE, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD, D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
+df2_IRS_BERTHVISIT_HISTORY_VW_clean <- select (df2_IRS_BERTHVISIT_HISTORY_VW, c(BERTHVISIT_COMM_ID, BERTH_CODE, D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD, D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
+df2_IRS_BERTHVISIT_VW_clean <- rbind(df2_IRS_BERTHVISIT_HISTORY_VW_clean, df2_IRS_BERTHVISIT_VW_clean)
+df2_IRS_BERTHVISIT_VW_clean[df2_IRS_BERTHVISIT_VW_clean == ""] <- NA
+#df2_IRS_BERTHVISIT_VW_clean <- na.omit(df2_IRS_BERTHVISIT_VW_clean)
+
+
+#create date-time start estimate column
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdstartestimate = paste(D_BERTH_ETA, T_BERTH_ETA, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartestimate, unit = "10 minutes")
+
+
+#create date-time end estimate column
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdendestimate = paste(D_BERTH_ETD, T_BERTH_ETD, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdendestimate, unit = "10 minutes")
+df2_IRS_BERTHVISIT_VW_clean <- select (df2_IRS_BERTHVISIT_VW_clean, -c(D_BERTH_ETA, T_BERTH_ETA, D_BERTH_ETD, T_BERTH_ETD))
+
+
+#create date-time start actual column
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdstartactual = paste(D_BERTH_ATA, T_BERTH_ATA, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdstartactual, unit = "10 minutes")
+
+#create date-time end actual column
+df2_IRS_BERTHVISIT_VW_clean <- mutate(df2_IRS_BERTHVISIT_VW_clean, datumtijdendactual = paste(D_BERTH_ATD, T_BERTH_ATD, sep = " "))
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual <- as.POSIXct(df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual, tz ="Etc/GMT+1", "%Y%m%d %H%M")
+df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual <- round_date(df2_IRS_BERTHVISIT_VW_clean$datumtijdendactual, unit = "10 minutes")
+df2_IRS_BERTHVISIT_VW_clean <- select (df2_IRS_BERTHVISIT_VW_clean, -c(D_BERTH_ATA, T_BERTH_ATA, D_BERTH_ATD, T_BERTH_ATD))
+rm(df2_IRS_BERTHVISIT_VW)
+
+#------------------------CLEAN MOVEMENT, Ligplaatsen en REF_SHIP_VW and Remove unnecessary---------------------#
+
+#-------------------------------------Movement_History_VW_Clean------------------------------------------------------------
+
+movement_history_vw_clean <- select(df2_IRS_MOVEMENT_HISTORY_VW, c(MUTATION_TYPE, MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
+movement_history_vw_clean[movement_history_vw_clean == ""] <- NA
+#movement_history_vw_clean <- na.omit(movement_history_vw_clean)
+movement_vw_clean <- select(df2_IRS_MOVEMENT_VW, c(MUTATION_TYPE, MOVEMENT_COMM_ID, VESSELVISIT_COMM_ID, BV_ARR_COMM_ID ))
+movement_total <- rbind(movement_vw_clean, movement_history_vw_clean)
+filtered_movement <- filter(movement_total, movement_total$MUTATION_TYPE == "CREATED")
+#filtered_movement$BV_ARR_COMM_ID <- as.numeric(filtered_movement$BV_ARR_COMM_ID)
+rm(df2_IRS_MOVEMENT_HISTORY_VW, df2_IRS_MOVEMENT_VW, movement_vw_clean, movement_history_vw_clean, movement_total)
+
+#------------------------------------Ligplaatsen_Haven_Clean--------------------------------------------------------------
+# Join ligplaatstabellen 
+
+joinligplaatsen <- full_join(df2_longlat_havens_correct, ligplaatsen_haven, by = "Ligplaatscode", suffix = c(".ll", ".ou"))
+
+# Select relevante kolommen
+
+ligplaatsen_haven_clean <- select(joinligplaatsen, Ligplaatscode, Ligplaatsnaam.ll, Categorie, Latitude, Longitude, Ligplaats_Type, Haven_Hoofdvaarweg, Havenbekken)
+
+# insert na waar van toepassing
+ligplaatsen_haven_clean[ligplaatsen_haven_clean== ""] <- NA
+
+# verwijder .ll bij ligplaatsnaam 
+colnames(ligplaatsen_haven_clean)[colnames(ligplaatsen_haven_clean)=="Ligplaatsnaam.ll"] <- "Ligplaatsnaam"
+
+# corrigeer foutief ingelezen Long en Lats
+ligplaatsen_haven_clean$Longitude <- as.numeric(ligplaatsen_haven_clean$Longitude)
+
+stri_sub(ligplaatsen_haven_clean$Longitude, 2, 1) <- "."
+stri_sub(ligplaatsen_haven_clean$Latitude, 3,2) <- "."
+
+ligplaatsen_haven_clean$Longitude <- as.double(ligplaatsen_haven_clean$Longitude)
+ligplaatsen_haven_clean$Latitude <- as.double(ligplaatsen_haven_clean$Latitude)
+
+rm(ligplaatsen_haven)
+
+#-------------------------------------Ref_Ship_VW_Clean-------------------------------------------------------------------
+
+ref_ship_vw_clean <- select(df2_IRS_REF_SHIP_VW, c(SHIP_COMM_ID, SHIPNUMBER, LENGTH, LONDON_LENGTH, BEAM, MAXIMUM_DRAUGHT, GROSS_TONNAGE, NETT_TONNAGE))
+ref_ship_vw_clean[ref_ship_vw_clean == ""] <- NA
+#ref_ship_vw_clean <- na.omit(ref_ship_vw_clean)
+rm(df2_IRS_REF_SHIP_VW)
+
+#----------------------------------------Binnenvaartschepen--------------------------------------------------------------
+
+df2_binnenvaartschepen$ENI_Nummer <- ifelse(df2_binnenvaartschepen$ENI_Nummer == "", df2_binnenvaartschepen$EU_Nummer, df2_binnenvaartschepen$ENI_Nummer)
+df2_binnenvaartschepen <- select (df2_binnenvaartschepen, -c(EU_Nummer))
+
+#---------------------------Lege velden uit en nullen plaatsen voor ENI nummer om tot 8 cijfers aan te vullen-----------
+
+df2_binnenvaartschepen$ENI_Nummer[df2_binnenvaartschepen$ENI_Nummer == ""] <- NA
+df2_binnenvaartschepen <- df2_binnenvaartschepen[complete.cases(df2_binnenvaartschepen[ , 3]),]
+df2_binnenvaartschepen$ENI_Nummer <- str_pad(df2_binnenvaartschepen$ENI_Nummer, 8, pad = "0")
+
+#selecteer alleen de meest recente versie van elke ENI_Nummer
+df2_binnenvaartschepen <- setDT(df2_binnenvaartschepen)[,.SD[which.max(Bouwjaar)],keyby=ENI_Nummer]
+
+#------------------------------------------------------------------------------------------------------------------------
+#Delete kolom URL en voortstuwing
+df2_binnenvaartschepen <- select (df2_binnenvaartschepen,-c(URL,Voortstuwing))
+
+#Delete alles wat niet cijfers zijn
+df2_binnenvaartschepen$Lengte <- gsub("[^0-9]", "", df2_binnenvaartschepen$Lengte)
+df2_binnenvaartschepen$Breedte <- gsub("[^0-9]", "", df2_binnenvaartschepen$Breedte)
+df2_binnenvaartschepen$Diepgang <- gsub("[^0-9]", "", df2_binnenvaartschepen$Diepgang)
+df2_binnenvaartschepen$Tonnage <- gsub("[^0-9]", "", df2_binnenvaartschepen$Tonnage)
+
+#Verwijder regels zonder scheepsnaam, scheepsnaam 59 ton, schepen verwijderd die niet interessant zijn
+df2_binnenvaartschepen$Scheepsnaam <- na.omit(df2_binnenvaartschepen$Scheepsnaam)
+df2_binnenvaartschepen <- df2_binnenvaartschepen[!(df2_binnenvaartschepen$Scheepsnaam == "59 ton"), ]
+df2_binnenvaartschepen$Type_Vaart <- na.omit(df2_binnenvaartschepen$Type_Vaart)
+
+#---------------------------Categoriseer binnenvaartschepen---------------------------------------------------------------
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Kraan & overslagschip"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Motorbeunschip"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Motortankschip"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Poedertanker"] = "vracht"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Motorvrachtschip"] = "vracht"
+
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Cruiseschip"] = "pleziervaart"
+df2_binnenvaartschepen$Type_Vaart [df2_binnenvaartschepen$Scheepstype == "Passagiersschip"] = "pleziervaart"
+
+#--------------------------Waterstanden categoriseren  ------------------------------------------------------------------
+# create new df 
+waterstanden1 <- df2_Waterstanden
+
+# rename columns
+colnames(waterstanden1)[colnames(waterstanden1)=="Hagestein_beneden"] <- "HAGESTEIN"
+colnames(waterstanden1)[colnames(waterstanden1)=="IJmuiden_buitenhaven"] <- "IJMUIDENBUITEN"
+colnames(waterstanden1)[colnames(waterstanden1)=="IJmuiden_stroommeetpaal"] <- "IJMUIDENSTROOM"
+
+# add new columns to be filled with categories. 
+waterstanden1$BUITENHUIZENCAT <- waterstanden1$BUITENHUIZEN
+waterstanden1$SURINAMECAT <- waterstanden1$SURINAME
+waterstanden1$HAGESTEINCAT <- waterstanden1$HAGESTEIN
+waterstanden1$IJMUIDENBUITENCAT <- waterstanden1$IJMUIDENBUITEN
+waterstanden1$IJMUIDENSTROOMCAT <- waterstanden1$IJMUIDENSTROOM
+
+# fill categories for Buitenhuizen. Chosen categories are:  
+# x is smaller than -48 as "VERY LOW"
+# x is larger than or equal to -48 and smaller than or equal to the mean as "LOW"
+# x is larger than the mean and equal to or smaller than -38 as "HIGH"
+# x is larger -38 as "VERY HIGH"
+
+waterstanden1$BUITENHUIZENCAT [waterstanden1$BUITENHUIZEN < -48] = "VERY LOW"
+waterstanden1$BUITENHUIZENCAT [waterstanden1$BUITENHUIZEN >= -48 & waterstanden1$BUITENHUIZEN <= -43] = "LOW"
+waterstanden1$BUITENHUIZENCAT [waterstanden1$BUITENHUIZEN > -43 & waterstanden1$BUITENHUIZEN <= -38] = "HIGH"
+waterstanden1$BUITENHUIZENCAT [waterstanden1$BUITENHUIZEN > -38] = "VERY HIGH"
+
+# fill categirues for Surinamekade. Chosen categories are
+# x is smaller than -46 as "VERY LOW"
+# x is larger than or equal to -46 and smaller than or equal to the mean as "LOW"
+# x is larger than the mean and equal to or smaller than -38 as "HIGH"
+# x is larger than -38 as "VERY HIGH"
+
+waterstanden1$SURINAMECAT [waterstanden1$SURINAME < -46] = "VERY LOW"
+waterstanden1$SURINAMECAT [waterstanden1$SURINAME >= -46 & waterstanden1$SURINAME <= -42] = "LOW"
+waterstanden1$SURINAMECAT [waterstanden1$SURINAME > -42 & waterstanden1$SURINAME <= -38] = "HIGH"
+waterstanden1$SURINAMECAT [waterstanden1$SURINAME > -38] = "VERY HIGH"
+
+
+# fill categories for Hagenstein. Chosen categories are
+# x is smaller than - 40 as "VERY LOW"
+# x is larger than or equal to -40 and smaller than or equal to the mean as "LOW"
+# x is larger than the mean and equal to or smaller than 160 as "HIGH"
+# x is larger than than 160 as "VERY HIGH".
+
+waterstanden1$HAGESTEINCAT [waterstanden1$HAGESTEIN < -40] = "VERY LOW"
+waterstanden1$HAGESTEINCAT [waterstanden1$HAGESTEIN >= -40 & waterstanden1$HAGESTEIN <= 72] = "LOW"
+waterstanden1$HAGESTEINCAT [waterstanden1$HAGESTEIN > 72 & waterstanden1$HAGESTEIN <= 160] = "HIGH"
+waterstanden1$HAGESTEINCAT [waterstanden1$HAGESTEIN > 160] = "VERY HIGH"
+
+# fill categories for IJmuiden buiten. Chosen categories are
+# x is smaller than -80 as "VERY LOW
+# x is larger than or equal to -80 and smaller than or equal to 4 (mean) as "LOW"
+# x is larger 4 and equal to or smaller than 100 as "HIGH"
+# x is larger than than 100 as "VERY HIGH".
+
+waterstanden1$IJMUIDENBUITENCAT [waterstanden1$IJMUIDENBUITEN < -80] = "VERY LOW"
+waterstanden1$IJMUIDENBUITENCAT [waterstanden1$IJMUIDENBUITEN >= -80 & waterstanden1$IJMUIDENBUITEN<= 3] = "LOW"
+waterstanden1$IJMUIDENBUITENCAT [waterstanden1$IJMUIDENBUITEN > 3 & waterstanden1$IJMUIDENBUITEN <= 100] = "HIGH"
+waterstanden1$IJMUIDENBUITENCAT [waterstanden1$IJMUIDENBUITEN > 100] = "VERY HIGH"
+
+# fill categories for IJmuiden stroom. Chosen categories are identical to IJMUIDEN BUITEN, except for
+# the mean, in this case: 5. 
+
+waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM < -80] = "VERY LOW"
+waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM >= -80 & waterstanden1$IJMUIDENSTROOM<= 5] = "LOW"
+waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM > 5 & waterstanden1$IJMUIDENSTROOM <= 100] = "HIGH"
+waterstanden1$IJMUIDENSTROOMCAT [waterstanden1$IJMUIDENSTROOM > 100] = "VERY HIGH"
+
+# get rid of any boolean columns
+waterstanden1 <-as.data.frame(waterstanden1)
+waterstanden1 <- select(waterstanden1, -c(ID ))
+
+# ------------------------------- # JOOOOIN ---------------------------------------------------------------------------------------------------------------------------------
+
+library(dplyr)
+
+#-----------------create waterstanden tables for 2x join met start en eind------------------------------#
+
+waterstanden1$datumtijd <- as.POSIXct(waterstanden1$datumtijd)
+df2_Waterstanden_start <- waterstanden1
+colnames(df2_Waterstanden_start) <- paste("start", colnames(df2_Waterstanden_start), sep = "_")
+
+df2_Waterstanden_end <- waterstanden1
+colnames(df2_Waterstanden_end) <- paste("end", colnames(df2_Waterstanden_end), sep = "_")
+
+#---------------------JOIN Binnenvaart met waterstanden en scheepsgegevens---------------------#
+
+Binnenvaartjoin1 <- left_join(df2_IRS_VESSELVISIT_VW_clean, df2_binnenvaartschepen, by = c("BARGE_NUMBER" = "ENI_Nummer"))
+Binnenvaartjoin2 <- left_join(Binnenvaartjoin1, df2_Waterstanden_start, by = c("datumtijdstart" = "start_datumtijd"))
+Binnenvaartjoin3 <- left_join(Binnenvaartjoin2, df2_Waterstanden_end, by = c("datumtijdend" = "end_datumtijd"))
+
+#Remove all cases without a Barge Number and Scheepsnaam
+Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$BARGE_NUMBER),]
+Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$Scheepsnaam),]
