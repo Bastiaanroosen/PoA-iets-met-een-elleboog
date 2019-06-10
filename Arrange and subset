@@ -1,4 +1,32 @@
 #arrange
 Binnenvaartjoin3<- Binnenvaartjoin3 %>% arrange(Binnenvaartjoin3$start_WAARNEMINGDATUM)
 #subset
-Binnenvaartjoin3_small <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-01-01 00:00:00"))
+Binnenvaartjoin3_small1 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-01-01 00:00:00"))
+Binnenvaartjoin3_small1 <- subset(Binnenvaartjoin3_small1, datumtijdstart < as.POSIXct("2018-02-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small2 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-02-01 00:00:00"))
+Binnenvaartjoin3_small2 <- subset(Binnenvaartjoin3_small2, datumtijdstart < as.POSIXct("2018-03-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small3 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-03-01 00:00:00"))
+Binnenvaartjoin3_small3 <- subset(Binnenvaartjoin3_small3, datumtijdstart < as.POSIXct("2018-04-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small4 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-04-01 00:00:00"))
+Binnenvaartjoin3_small4 <- subset(Binnenvaartjoin3_small4, datumtijdstart < as.POSIXct("2018-05-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small5 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-05-01 00:00:00"))
+Binnenvaartjoin3_small5 <- subset(Binnenvaartjoin3_small5, datumtijdstart < as.POSIXct("2018-06-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small6 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-06-01 00:00:00"))
+Binnenvaartjoin3_small6 <- subset(Binnenvaartjoin3_small6, datumtijdstart < as.POSIXct("2018-07-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small7 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-07-01 00:00:00"))
+Binnenvaartjoin3_small7 <- subset(Binnenvaartjoin3_small7, datumtijdstart < as.POSIXct("2018-08-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small8 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-08-01 00:00:00"))
+Binnenvaartjoin3_small8 <- subset(Binnenvaartjoin3_small8, datumtijdstart < as.POSIXct("2018-09-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small9 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-09-01 00:00:00"))
+Binnenvaartjoin3_small9 <- subset(Binnenvaartjoin3_small9, datumtijdstart < as.POSIXct("2018-10-01 00:00:00"))
+------------------------------------------------------------------------------------------------------------------
+Binnenvaartjoin3_small0 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-10-01 00:00:00"))
+Binnenvaartjoin3_small0 <- subset(Binnenvaartjoin3_small0, datumtijdstart < as.POSIXct("2018-11-01 00:00:00"))
