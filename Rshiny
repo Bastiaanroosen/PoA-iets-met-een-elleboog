@@ -12,7 +12,7 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     fluidRow(
-      box(plotlyOutput("water")), box(plotlyOutput("tijd"))
+      box(plotlyOutput("waterst")), box(plotlyOutput("ltijden"))
     ),
     
     fluidRow(box(sliderInput("periodesl", "Data per maand", 1,10,1,1)))
@@ -20,11 +20,11 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-  output$water <- renderPlotly({
+  output$waterst <- renderPlotly({
     water  <- ggplot(Binnenvaartjoin3_small1, aes(Binnenvaartjoin3_small1$datumtijdstart, Binnenvaartjoin3_small1$start_HAVENMEAN)) + geom_line()
   })
   
-  output$tijd <- renderPlotly({
+  output$ltijden <- renderPlotly({
     tijden  <- ggplot(Binnenvaartjoin3_small1, aes(Binnenvaartjoin3_small1$datumtijdstart, Binnenvaartjoin3_small1$hoursberth)) + geom_point()
   })
 }
