@@ -1,0 +1,45 @@
+# 06-navlist.R
+
+#library(shiny)
+
+#Here you determine the UI
+ui <- navbarPage(title = "Random generator",
+                 tabPanel(title = "Normal data",
+                          plotOutput("slider1"),
+                          sliderInput("slider1", "Slider Range",
+                                      min = as.POSIXct("2013-01-01 00:00:00"),
+                                      max = as.POSIXct("2018-10-31 00:00:00"),
+                                      value= c(as.POSIXct("2013-01-01 00:00:00"), as.POSIXct("2018-10-31 00:00:00"))
+                          )
+                 )
+)
+
+server <- function(input, output) {
+  
+  
+  
+  #here make sure there is a default and determine that it's a reactivevalues
+  #rv <- reactiveValues(
+  #  strt = as.POSIXct("2018-01-01 00:00:00")
+  #  nnd = as.POSIXct("2018-10-31 00:00:00"))
+  
+  #here you can set the dataframa which you want to plot  
+  #observeEvent(input$slider1[1], { rv$strt <- input$slider1[1]})
+  #observeEvent(input$slider1[2], { rv$nnd <- input$slider1[2]})
+  
+  #Here you plot
+  
+  output$slider1 <- renderPlot({
+    
+    Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$datumtijdstartestimate > as.POSIXct(input$slider1[1]))
+    Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$datumtijdstartestimate < as.POSIXct(input$slider1[2]))
+    
+    ggplot(Scheepsvaart)+
+      geom_point(mapping = aes(x=Scheepsvaart$Arrivaldelay, 
+                               y=Scheepsvaart$start_ZEEMEAN, 
+                               colour = Scheepsvaart$start_IJMUIDENBUITENCAT))
+      
+  })
+}
+
+shinyApp(server = server, ui = ui)
