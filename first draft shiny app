@@ -1,0 +1,26 @@
+ui <- navbarPage(title = "Traffic in the Harbour - Binnenvaartschepen",
+                 tabPanel(title = "Insert title",
+                          plotOutput("slider1"),
+                          sliderInput("slider1", "Selecte date range",
+                                      min = as.Date("2018-01-01", '%Y%m%d'),
+                                      max = as.Date("2018-10-31", '%Y%m%d'),
+                                      value= c(as.Date("2018-01-01", '%Y%m%d'), as.Date("2018-10-31", '%Y%m%d'))
+                          )
+                 )
+)
+
+server <- function(input, output) {
+  
+  output$slider1 <- renderPlot({
+    
+    # xstart <- as.Date(input$slider1[1],'%Y%m%d')
+    # xend <- as.Date(input$slider1[2], '%Y%m%d')
+    
+    ggplot(graph,aes(x=graph$Date, y=graph$Number_of_Ships, group=graph$trafftype)) +
+      geom_line(aes(color=trafftype))+
+      geom_point(aes(color=trafftype)+
+      xlim(input$slider1[1], input$slider1[2]))
+  })
+}
+
+shinyApp(server = server, ui = ui)
