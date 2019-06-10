@@ -20,7 +20,7 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
-  output$tijd <- renderPlotly({
+  output$water <- renderPlotly({
     water  <- ggplot(Binnenvaartjoin3_small1, aes(Binnenvaartjoin3_small1$datumtijdstart, Binnenvaartjoin3_small1$start_HAVENMEAN)) + geom_line()
   })
   
