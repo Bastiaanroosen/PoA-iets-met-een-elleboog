@@ -1,18 +1,25 @@
 #load libraries
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 # select all arrivals & departures within 2018 to be counted per day. 
+
+bvStartDate <- as.POSIXct("2018-01-01 00:00:00")
+bvEndDate <- as.POSIXct("2019-01-01 00:00:00")
+
 
 date1 <- filter(Binnenvaartjoin3, Binnenvaartjoin3$datumtijdstart > bvStartDate)
 date2 <- filter(date1, date1$datumtijdend > bvStartDate)
 date3 <- filter(date2, date2$datumtijdstart < bvEndDate)
 date4 <- filter(date3, date1$datumtijdend < bvEndDate)
 
+dfgraph <- date4
+
 rm(date1)
 rm(date2)
 rm(date3)
-dfgraph <- date4
+rm(date4)
 
 #create df to use for counting
 x <- c("datumtijdstart", "datumtijdend", "comm_id")
@@ -45,6 +52,7 @@ graph2 <- table(dfgraphA$datumtijdstart)
 graph2 <- as.data.frame(graph2)
 graph2$Date <- as.Date(graph2$Date, '%Y%m%d')
 
+class(graph2)
 # change column names
 names(graph2)[names(graph2) == "Var1"] <- "Date"
 names(graph2)[names(graph2) == "Freq"] <- "Number_of_Ships"
@@ -57,6 +65,8 @@ graph3 <- table(dfgraphA$datumtijdend)
 graph3 <- as.data.frame(graph3)
 graph3$Date <- as.Date(graph3$Date, '%Y%m%d')
 
+class(graph3)
+
 # change column names
 names(graph3)[names(graph3) == "Var1"] <- "Date"
 names(graph3)[names(graph3) == "Freq"] <- "Number_of_Ships"
@@ -64,13 +74,21 @@ names(graph3)[names(graph3) == "Freq"] <- "Number_of_Ships"
 # add type of traffic 
 graph3$trafftype <-"Departures"
 
+class(graph3)
 # merge all the counts together
-graph <- rbind(graph1, graph2)
-graph <- rbind(graph, graph3)
+graph <- as.data.frame(rbind(graph1, graph2))
+class(graph)
+graph <- as.data.frame(rbind(graph, graph3))
+
+class(graph)
 
 rm(graph1)
 rm(graph2)
 rm(graph3)
+rm(dfgraph)
+rm(dfgraphA)
+
+## seem to be three classes in the graph df for some reason. 
 
 # attempt line graph
 ggplot(graph, aes(x=graph$Date, y=graph$Number_of_Ships, group=graph$trafftype)) +
