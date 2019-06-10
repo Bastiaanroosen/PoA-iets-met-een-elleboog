@@ -20,3 +20,16 @@ Binnenvaartjoin3 <- left_join(Binnenvaartjoin2, df2_Waterstanden_end, by = c("da
 #Remove all cases without a Barge Number and Scheepsnaam
 Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$BARGE_NUMBER),]
 Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$Scheepsnaam),]
+
+#---------------------JOIN Scheepsvaart met waterstanden en scheepsgegevens---------------------#
+
+Scheepsvaartjoin1 <- left_join(df2_IRS_BERTHVISIT_VW_clean, ligplaatsen_haven_clean, by = c("BERTH_CODE" = "Ligplaatscode"))
+Scheepsvaartjoin2 <- left_join(df2_IRS_VESSELVISIT_VW_clean, ref_ship_vw_clean, by = "SHIP_COMM_ID")
+Scheepsvaartjoin3 <- left_join(filtered_movement, Scheepsvaartjoin2, by="VESSELVISIT_COMM_ID")
+Scheepsvaartjoin4 <- left_join(Scheepsvaartjoin1, Scheepsvaartjoin3, by = c("BERTHVISIT_COMM_ID" = "BV_ARR_COMM_ID"))
+
+#-----------------Join waterstanden tables met actual start en actual eind------------------------------#
+
+Scheepsvaartjoin5 <- left_join(Scheepsvaartjoin4, df2_Waterstanden_start, by = c("datumtijdstartactual" = "start_datumtijd"))
+Scheepsvaartjoin6 <- left_join(Scheepsvaartjoin5, df2_Waterstanden_end, by = c("datumtijdendactual" = "end_datumtijd"))
+
