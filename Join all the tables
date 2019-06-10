@@ -21,23 +21,26 @@ Binnenvaartjoin3 <- left_join(Binnenvaartjoin2, df2_Waterstanden_end, by = c("da
 Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$BARGE_NUMBER),]
 Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$Scheepsnaam),]
 
-#---------------------JOIN Scheepsvaart met waterstanden en scheepsgegevens---------------------#
+#---------------------JOIN Scheepsvaart metscheepsgegevens---------------------#
 
 Scheepsvaartjoin1 <- left_join(df2_IRS_BERTHVISIT_VW_clean, ligplaatsen_haven_clean, by = c("BERTH_CODE" = "Ligplaatscode"))
 Scheepsvaartjoin2 <- left_join(df2_IRS_VESSELVISIT_VW_clean, ref_ship_vw_clean, by = "SHIP_COMM_ID")
 Scheepsvaartjoin3 <- left_join(filtered_movement, Scheepsvaartjoin2, by="VESSELVISIT_COMM_ID")
 Scheepsvaartjoin4 <- left_join(Scheepsvaartjoin1, Scheepsvaartjoin3, by = c("BERTHVISIT_COMM_ID" = "BV_ARR_COMM_ID"))
 
-#-----------------Join waterstanden tables met actual start en actual eind------------------------------#
+#-----------------Join Scheepsvaart met waterstanden tables met actual start en actual eind------------------------------#
 
 Scheepsvaartjoin5 <- left_join(Scheepsvaartjoin4, df2_Waterstanden_start, by = c("datumtijdstartactual" = "start_datumtijd"))
 Scheepsvaartjoin6 <- left_join(Scheepsvaartjoin5, df2_Waterstanden_end, by = c("datumtijdendactual" = "end_datumtijd"))
 
+#Create Arrival delay en Departure delay
 Scheepsvaart <- Scheepsvaartjoin6
 Scheepsvaart$Arrivaldelay <- as.numeric(difftime(as.POSIXct(Scheepsvaart$datumtijdstartestimate), as.POSIXct(Scheepsvaart$datumtijdstartactual)))
 Scheepsvaart$Departuredelay <- as.numeric(difftime(as.POSIXct(Scheepsvaart$datumtijdendestimate), as.POSIXct(Scheepsvaart$datumtijdendactual)))
 Scheepsvaart <- Scheepsvaart[complete.cases(Scheepsvaart$Arrivaldelay),]
 Scheepsvaart <- Scheepsvaart[complete.cases(Scheepsvaart$Departuredelay),]
+
+#Filter alle cases die langer dan 10 dagen delay hadden.
 Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Arrivaldelay > -864000)    
 Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Arrivaldelay < 864000) 
 Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Departuredelay > -864000)    
