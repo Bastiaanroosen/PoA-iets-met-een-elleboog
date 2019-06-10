@@ -1,0 +1,49 @@
+library(shiny)
+
+ui <- sidebarPanel(
+  title = "Ligtijden en Waterstanden in de Haven van Amsterdam",
+  
+  # input date range, based on min and max dates in data set & Dutch time and date conventions
+  dateRangeInput(inputId  = "date", label = "Select date range", 
+                start  = "2014-11-26",
+                end    = "2018-10-22",
+                min    = "2014-11-26",
+                max    = "2018-10-22",
+               format = "dd-mm-yyyy", weekstart = 1, separator = "to"), 
+
+  # add slider to select time by hour
+  sliderInput("slider_hours", "Hours:", min=0, max=23, value= c(0, 23), step = 1),
+
+  # add slider to select time by minutes
+  sliderInput("slider_mins", "Minutes:", min = 0, max = 59, value = c(0, 59), step = 1),
+
+  # allows user to select type of ship
+  selectInput(inputId = "typevaart", label = "Type of Ship", 
+              choices = c("vracht", "pleziervaart"), 
+              selected = c("vracht", "pleziervaart"), 
+              multiple = TRUE),
+  
+  # use for selecting features
+  selectInput(inputId = "features", label = "Select feature", 
+              choices = c("Time of Arrival", "Time of Departure", "Wait times vs Number of Ships in Port"),
+              selected = c("Time of Arrival", "Time of Departure", "Wait times vs Number of Ships in Port"),
+              multiple = TRUE),
+  
+  
+  # use for the group by options
+  radioButtons(inputId = "radio_groupby",  label = "Group by", 
+               choices = c("Day of Week" = "weekday", "Date & Time" = "datumtijd"),
+               selected = "datumtijd",
+               inline = TRUE)
+ 
+)
+# output in de vorm van een lijngrafiek
+#plotOutput(ggplot(data = mtcars, aes(x=dose, y=len, group=1)) +
+#             geom_line()+
+#             geom_point()  
+#  )
+  
+
+server <- function(input, output) {}
+
+shinyApp(server = server, ui = ui)
