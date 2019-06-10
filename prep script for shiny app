@@ -1,0 +1,79 @@
+#load libraries
+library(ggplot2)
+library(dplyr)
+
+# select all arrivals & departures within 2018 to be counted per day. 
+
+date1 <- filter(Binnenvaartjoin3, Binnenvaartjoin3$datumtijdstart > bvStartDate)
+date2 <- filter(date1, date1$datumtijdend > bvStartDate)
+date3 <- filter(date2, date2$datumtijdstart < bvEndDate)
+date4 <- filter(date3, date1$datumtijdend < bvEndDate)
+
+rm(date1)
+rm(date2)
+rm(date3)
+dfgraph <- date4
+
+#create df to use for counting
+x <- c("datumtijdstart", "datumtijdend", "comm_id")
+dfgraphA <- data.frame(matrix(ncol = 3, nrow = 53924))
+colnames(dfgraphA) <- x
+
+# chop of the time and fill new dataframe A
+dfgraphA$datumtijdstart <- as.Date(dfgraph$datumtijdstart,'%Y%m%d')
+dfgraphA$datumtijdend <- as.Date(dfgraph$datumtijdend,'%Y%m%d')                     
+dfgraphA$comm_id <- dfgraph$VESSELVISIT_COMM_ID
+
+
+# count Number_of_Ships in harbour per day for over 2018
+count1 <- data.frame(rng = seq(min(dfgraphA$datumtijdstart), max(dfgraphA$datumtijdend), by = 'day'))
+graph1 <- merge(dfgraphA, count1, all=TRUE) %>% 
+  filter(rng >= datumtijdstart, rng <= datumtijdend) %>%
+  group_by(rng) %>% 
+  summarise(n())
+
+
+# change column names
+names(graph1)[names(graph1) == "rng"] <- "Date"
+names(graph1)[names(graph1) == "n()"] <- "Number_of_Ships"
+
+# add type of traffic 
+graph1$trafftype <-"In Harbour"
+
+# count all the arrivals
+graph2 <- table(dfgraphA$datumtijdstart)
+graph2 <- as.data.frame(graph2)
+graph2$Date <- as.Date(graph2$Date, '%Y%m%d')
+
+# change column names
+names(graph2)[names(graph2) == "Var1"] <- "Date"
+names(graph2)[names(graph2) == "Freq"] <- "Number_of_Ships"
+
+# add type of traffic 
+graph2$trafftype <-"Arrivals"
+
+# and now count all the departures
+graph3 <- table(dfgraphA$datumtijdend)
+graph3 <- as.data.frame(graph3)
+graph3$Date <- as.Date(graph3$Date, '%Y%m%d')
+
+# change column names
+names(graph3)[names(graph3) == "Var1"] <- "Date"
+names(graph3)[names(graph3) == "Freq"] <- "Number_of_Ships"
+
+# add type of traffic 
+graph3$trafftype <-"Departures"
+
+# merge all the counts together
+graph <- rbind(graph1, graph2)
+graph <- rbind(graph, graph3)
+
+rm(graph1)
+rm(graph2)
+rm(graph3)
+
+# attempt line graph
+ggplot(graph, aes(x=graph$Date, y=graph$Number_of_Ships, group=graph$trafftype)) +
+  geom_line(aes(color=trafftype))+
+  geom_point(aes(color=trafftype))
+
