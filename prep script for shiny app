@@ -33,16 +33,15 @@ dfgraphA$comm_id <- dfgraph$VESSELVISIT_COMM_ID
 
 
 # count Number_of_Ships in harbour per day for over 2018
-count1 <- data.frame(rng = seq(min(dfgraphA$datumtijdstart), max(dfgraphA$datumtijdend), by = 'day'))
-graph1 <- merge(dfgraphA, count1, all=TRUE) %>% 
-  filter(rng >= datumtijdstart, rng <= datumtijdend) %>%
-  group_by(rng) %>% 
-  summarise(n())
+graph1 <- data.frame(rng = seq(min(dfgraphA$datumtijdstart), max(dfgraphA$datumtijdend), by = 'day'))
+graph1$Number_of_Ships <- 
+  sapply(graph1$rng, function(x)
+    sum(as.Date(dfgraphA$datumtijdstart) < as.Date(x) &
+          as.Date(dfgraphA$datumtijdend) > as.Date(x)))
 
 
 # change column names
 names(graph1)[names(graph1) == "rng"] <- "Date"
-names(graph1)[names(graph1) == "n()"] <- "Number_of_Ships"
 
 # add type of traffic 
 graph1$trafftype <-"In Harbour"
