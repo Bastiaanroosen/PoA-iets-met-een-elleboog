@@ -19,5 +19,5 @@ Binnenvaartjoin3_small8 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct(
 Binnenvaartjoin3_small8 <- subset(Binnenvaartjoin3_small8, datumtijdstart < as.POSIXct("2018-09-01 00:00:00"))
 Binnenvaartjoin3_small9 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-09-01 00:00:00"))
 Binnenvaartjoin3_small9 <- subset(Binnenvaartjoin3_small9, datumtijdstart < as.POSIXct("2018-10-01 00:00:00"))
-Binnenvaartjoin3_small0 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-10-01 00:00:00"))
-Binnenvaartjoin3_small0 <- subset(Binnenvaartjoin3_small0, datumtijdstart < as.POSIXct("2018-11-01 00:00:00"))
+Binnenvaartjoin3_small10 <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-10-01 00:00:00"))
+Binnenvaartjoin3_small10 <- subset(Binnenvaartjoin3_small0, datumtijdstart < as.POSIXct("2018-11-01 00:00:00"))
