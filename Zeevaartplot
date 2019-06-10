@@ -1,17 +1,27 @@
-# 06-navlist.R
-
 #library(shiny)
 
 #Here you determine the UI
 ui <- navbarPage(title = "Random generator",
-                 tabPanel(title = "Normal data",
+                 tabPanel(title = "Arrival Delays",
                           plotOutput("slider1"),
                           sliderInput("slider1", "Slider Range",
                                       min = as.POSIXct("2013-01-01 00:00:00"),
                                       max = as.POSIXct("2018-10-31 00:00:00"),
                                       value= c(as.POSIXct("2013-01-01 00:00:00"), as.POSIXct("2018-10-31 00:00:00"))
+                          ),
+                          selectInput("select1", "Select Meetpunt", c("BUITENHUIZEN", "SURINAME", "HAGESTEIN", "IJMUIDENBUITEN", "IJMUIDENSTROOM"), selected = "HAGESTEIN", multiple = FALSE,
+                                      )
+                 ),
+                 tabPanel(title = "Departure Delays",
+                          plotOutput("slider2"),
+                          sliderInput("slider2", "Slider Range",
+                                      min = as.POSIXct("2013-01-01 00:00:00"),
+                                      max = as.POSIXct("2018-10-31 00:00:00"),
+                                      value= c(as.POSIXct("2013-01-01 00:00:00"), as.POSIXct("2018-10-31 00:00:00"))),
+                          selectInput("select2", "Select Meetpunt", c("BUITENHUIZEN", "SURINAME", "HAGESTEIN", "IJMUIDENBUITEN", "IJMUIDENSTROOM"), selected = "HAGESTEIN", multiple = FALSE,
                           )
                  )
+                 
 )
 
 server <- function(input, output) {
@@ -33,13 +43,30 @@ server <- function(input, output) {
     
     Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$datumtijdstartestimate > as.POSIXct(input$slider1[1]))
     Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$datumtijdstartestimate < as.POSIXct(input$slider1[2]))
+    colselect <- paste("start_", input$select1, sep = "")
+    catselect <- paste("start_", input$select1, "CAT", sep = "")
     
     ggplot(Scheepsvaart)+
       geom_point(mapping = aes(x=Scheepsvaart$Arrivaldelay, 
-                               y=Scheepsvaart$start_ZEEMEAN, 
-                               colour = Scheepsvaart$start_IJMUIDENBUITENCAT))
+                               y=Scheepsvaart[, colselect], 
+                               colour = Scheepsvaart[, catselect]))
       
   })
-}
+
+  output$slider2 <- renderPlot({
+    
+    Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$datumtijdstartestimate > as.POSIXct(input$slider2[1]))
+    Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$datumtijdstartestimate < as.POSIXct(input$slider2[2]))
+    colselect2 <- paste("end_", input$select2, sep = "")
+    catselect2 <- paste("end_", input$select2, "CAT", sep = "")
+    
+    ggplot(Scheepsvaart)+
+      geom_point(mapping = aes(x=Scheepsvaart$Departuredelay, 
+                               y=Scheepsvaart[, colselect2], 
+                               colour = Scheepsvaart[, catselect2]))
+  
+  })
+    }
+
 
 shinyApp(server = server, ui = ui)
