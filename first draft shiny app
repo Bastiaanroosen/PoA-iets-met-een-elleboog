@@ -23,8 +23,18 @@ ui <- fluidPage(
                   max = as.Date("2018-10-31"),
                   value= c(as.Date("2018-01-01"), as.Date("2018-10-31"))),
       
+      checkboxGroupInput(inputId = "selecttraf",                                                                               
+                         label = h4("Select type of traffic"),                                                                       
+                         choices = c("Arrivals", "Departures", "In Harbour")
+                         selected = c("Arrivals", "Departures", "In Harbour")),
+      
+      
       # Input: select type of traffic (pleziervaart or vracht)
-      selectInput("selecttraf", "Select type of traffic", c("Pleziervaart", "Vracht", "Combined"), selected = "Combined", multiple = FALSE,
+      selectInput(inputId = "selectship", 
+                  label = "Select type of shipping", 
+                  choices = c("Pleziervaart", "Vracht", "Combined"), 
+                  selected = "Combined", 
+                  multiple = FALSE,
       )
       
       
@@ -53,16 +63,16 @@ server <- function(input, output) {
   # Show the values in an HTML table ----
   output$sliderdate <- renderPlot({
     
-    xstart <- as.Date(input$sliderdate[1])
-    xend <- as.Date(input$sliderdate[2])
+    # https://stackoverflow.com/questions/45261084/ggplot2-with-reactive-geom-lines
+    
     
     ggplot(graph) +
-      geom_line(aes(x=graph$Date, y=switch(input$selecttraf,
+      geom_line(aes(x=graph$Date, y=switch(input$selectship,
                                            Combined = graph$Number_of_Ships,
                                            Pleziervaart = graph$Number_of_plezier,
                                            Vracht = graph$Number_of_vracht
       ), group=graph$trafftype, color=trafftype))+ 
-      xlim(xstart, xend)
+      xlim(as.Date(input$sliderdate[1]), as.Date(input$sliderdate[2]))
     
   })
    
@@ -70,4 +80,3 @@ server <- function(input, output) {
 }
 
 shinyApp(server = server, ui = ui)
-
