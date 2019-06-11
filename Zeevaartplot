@@ -1,7 +1,9 @@
+# 06-navlist.R
+
 #library(shiny)
 
 #Here you determine the UI
-ui <- navbarPage(title = "Random generator",
+ui <- navbarPage(title = "PoA Ligtijden",
                  tabPanel(title = "Arrival Delays",
                           plotOutput("slider1"),
                           sliderInput("slider1", "Slider Range",
