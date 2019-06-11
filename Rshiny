@@ -9,13 +9,41 @@ ui <- dashboardPage(
   dashboardHeader(title = "POA Ligtijden"),
   dashboardSidebar(
     
+    sidebarMenu(
+      menuItem("Waterstanden vs ligtijden", tabName = "Waterstanden vs ligtijden", icon = icon("dashboard", badgeLabel = " ", badgeColor = "green")),
+      menuItem("tab2", tabName = "tab2", icon = icon("dashboard", badgeLabel = " ", badgeColor = "green")),
+      menuItem("tab3", tabName = "tab3", icon = icon("dashboard", badgeLabel = " ", badgeColor = "green")),
+    )
+    
   ),
   dashboardBody(
-    fluidRow(
-      box(plotlyOutput("waterst")), box(plotlyOutput("ltijden"))
-    ),
     
-    fluidRow(box(sliderInput("month", "Data per maand", 1,10,1,1)))
+    #tabs
+    tabItems(
+      #tab1
+      tabItem(tabName = "Waterstanden vs ligtijden",
+              fluidRow(
+                box(plotlyOutput("waterst")), box(plotlyOutput("ltijden"))
+              ),
+              
+              fluidRow(box(sliderInput("month", "Data per maand", 1,10,1,1)))
+              ),
+      #tab2
+      tabItem(tabName = "tab2",
+              
+        h2("tab2")
+        
+      ),
+      #tab3
+      tabItem(tabName = "tab3",
+              
+              h2("tab3")
+              
+      )
+      
+    )
+    
+    
   )
 )
 
@@ -24,7 +52,7 @@ server <- function(input, output) {
   
   output$waterst <- renderPlotly({
     
-   
+    
     month <- switch(
       input$month,
       jan,
