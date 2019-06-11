@@ -1,21 +1,32 @@
+# Libraries
+library(ggplot2)
+library(shiny)
+
+
+
 # Define UI for slider demo app ----
 ui <- fluidPage(
   
-  # App title ----
+  # App title
   titlePanel("Traffic in the Port of Amsterdam - Binnenvaartschepen"),
   
 
-  # Sidebar layout with input and output definitions ----
+  # Sidebar layout with inputs & outputs
   sidebarLayout(
     
-    # Sidebar to demonstrate various slider options ----
+    # Sidebar to make selections
     sidebarPanel(
       
-      # Input: Specification of range within an interval ----
-      sliderInput("slider1", "Selecte date range",
+      # Input: select date range over the period 1-1-2018 until 31-10-2018
+      sliderInput("sliderdate", "Selecte date range",
                   min = as.Date("2018-01-01"),
                   max = as.Date("2018-10-31"),
-                  value= c(as.Date("2018-01-01"), as.Date("2018-10-31")))
+                  value= c(as.Date("2018-01-01"), as.Date("2018-10-31"))),
+      
+      # Input: select type of traffic (pleziervaart or vracht)
+      selectInput("selecttraf", "Select type of traffic", c("Pleziervaart", "Vracht", "Combined"), selected = "Combined", multiple = FALSE,
+      )
+      
       
     ),
     
@@ -23,7 +34,7 @@ ui <- fluidPage(
     mainPanel(
       
       # Output: Table summarizing the values entered ----
-      plotOutput("slider1")
+      plotOutput("sliderdate")
       
     )
   )
@@ -40,16 +51,23 @@ server <- function(input, output) {
   # })
   
   # Show the values in an HTML table ----
-  output$slider1 <- renderPlot({
+  output$sliderdate <- renderPlot({
     
-    xstart <- as.Date(input$slider1[1])
-    xend <- as.Date(input$slider1[2])
+    xstart <- as.Date(input$sliderdate[1])
+    xend <- as.Date(input$sliderdate[2])
     
     ggplot(graph) +
-      geom_line(aes(x=graph$Date, y=graph$Number_of_Ships, group=graph$trafftype, color=trafftype))+
+      geom_line(aes(x=graph$Date, y=switch(input$selecttraf,
+                                           Combined = graph$Number_of_Ships,
+                                           Pleziervaart = graph$Number_of_plezier,
+                                           Vracht = graph$Number_of_vracht
+      ), group=graph$trafftype, color=trafftype))+ 
       xlim(xstart, xend)
+    
   })
+   
   
 }
 
 shinyApp(server = server, ui = ui)
+
