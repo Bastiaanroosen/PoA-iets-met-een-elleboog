@@ -15,17 +15,50 @@ ui <- dashboardPage(
       box(plotlyOutput("waterst")), box(plotlyOutput("ltijden"))
     ),
     
-    fluidRow(box(sliderInput("periodesl", "Data per maand", 1,10,1,1)))
+    fluidRow(box(sliderInput("month", "Data per maand", 1,10,1,1)))
   )
 )
 
 server <- function(input, output) {
+  
+  
   output$waterst <- renderPlotly({
-    water  <- ggplot(Binnenvaartjoin3_small1, aes(Binnenvaartjoin3_small1$datumtijdstart, Binnenvaartjoin3_small1$start_HAVENMEAN)) + geom_line()
+    
+   
+    month <- switch(
+      input$month,
+      jan,
+      feb,
+      mar,
+      apr,
+      may,
+      jun,
+      jul,
+      aug,
+      sep,
+      oct,
+    )
+    
+    water  <- ggplot(month, aes(x= datumtijdstart, y= start_HAVENMEAN)) + geom_line()
   })
   
   output$ltijden <- renderPlotly({
-    tijden  <- ggplot(Binnenvaartjoin3_small1, aes(Binnenvaartjoin3_small1$datumtijdstart, Binnenvaartjoin3_small1$hoursberth)) + geom_point()
+    
+    month <- switch(
+      input$month,
+      jan,
+      feb,
+      mar,
+      apr,
+      may,
+      jun,
+      jul,
+      aug,
+      sep,
+      oct,
+    )
+    
+    tijden  <- ggplot(month, aes(datumtijdstart, hoursberth)) + geom_point()
   })
 }
 
