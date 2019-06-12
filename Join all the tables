@@ -46,6 +46,173 @@ Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Arrivaldelay < 864000)
 Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Departuredelay > -864000)    
 Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Departuredelay < 864000) 
 
+#load libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+
+#==================== Prep shiny app - Arrivals, Departures, Number of Binnenvaartschepen in de Haven ================
+# remove all ships that do not fall with the vracht of pleziervaart categories
+
+date0 <- Binnenvaartjoin3[which(Binnenvaartjoin3$Type_Vaart != "NA"),]
+
+# select all arrivals & departures within 2018 to be counted per day. 
+
+bvStartDate <- as.POSIXct("2018-01-01 00:00:00")
+bvEndDate <- as.POSIXct("2019-01-01 00:00:00")
+
+
+date1 <- filter(date0, date0$datumtijdstart > bvStartDate)
+date2 <- filter(date1, date1$datumtijdend > bvStartDate)
+date3 <- filter(date2, date2$datumtijdstart < bvEndDate)
+date4 <- filter(date3, date1$datumtijdend < bvEndDate)
+
+dfgraph <- date4
+
+rm(date1)
+rm(date2)
+rm(date3)
+rm(date4)
+
+#create df to use for counting
+x <- c("datumtijdstart", "datumtijdend", "comm_id", "Type_Vaart")
+dfgraphA <- data.frame(matrix(ncol = 4, nrow = 44076))
+colnames(dfgraphA) <- x
+
+# chop of the time and fill new dataframe A
+dfgraphA$datumtijdstart <- as.Date(dfgraph$datumtijdstart,'%Y%m%d')
+dfgraphA$datumtijdend <- as.Date(dfgraph$datumtijdend,'%Y%m%d')                     
+dfgraphA$comm_id <- dfgraph$VESSELVISIT_COMM_ID
+dfgraphA$Type_Vaart <- dfgraph$Type_Vaart
+
+# count Number_of_Ships in harbour per day for over 2018
+graph1 <- data.frame(rng = seq(min(dfgraphA$datumtijdstart), max(dfgraphA$datumtijdend), by = 'day'))
+graph1$Number_of_Ships <- 
+  sapply(graph1$rng, function(x)
+    sum(as.Date(dfgraphA$datumtijdstart) < as.Date(x) &
+          as.Date(dfgraphA$datumtijdend) > as.Date(x)))
+
+# count Number of Ships of the type pleziervaart
+dfgraphplz <- dfgraphA[which(dfgraphA$Type_Vaart == "pleziervaart"),]
+
+graph1$Number_of_plezier <- 
+  sapply(graph1$rng, function(x)
+    sum(as.Date(dfgraphplz$datumtijdstart) < as.Date(x) &
+          as.Date(dfgraphplz$datumtijdend) > as.Date(x)))
+
+# count Number of Ships of the type vracht
+dfgraphvra <- dfgraphA[which(dfgraphA$Type_Vaart == "vracht"), ]
+
+graph1$Number_of_vracht <- 
+  sapply(graph1$rng, function(x)
+    sum(as.Date(dfgraphvra$datumtijdstart) < as.Date(x) &
+          as.Date(dfgraphvra$datumtijdend) > as.Date(x)))
+
+# change column names
+names(graph1)[names(graph1) == "rng"] <- "Date"
+
+# add type of traffic 
+graph1$trafftype <-"In Harbour"
+
+# count all the arrivals
+graph2 <- as.data.frame(table(dfgraphA$datumtijdstart))
+names(graph2)[names(graph2) == "Freq"] <- "Number_of_Ships"
+
+# count all the arriving plezier
+graphplz <- as.data.frame(table(dfgraphplz$datumtijdstart))
+names(graphplz)[names(graphplz) == "Freq"] <- "Number_of_plezier"
+
+# count all the arriving vracht 
+graphvra <- as.data.frame(table(dfgraphvra$datumtijdstart))
+names(graphvra)[names(graphvra) == "Freq"] <- "Number_of_vracht"
+
+
+# join up data and get it clean! 
+graph2 <- full_join(graph2, graphplz, by = "Var1")
+graph2 <- full_join(graph2, graphvra, by = "Var1")
+graph2 <- as.data.frame(graph2)
+graph2$Var1 <- as.Date(graph2$Var1)
+
+# change column names
+names(graph2)[names(graph2) == "Var1"] <- "Date"
+
+
+# add type of traffic 
+graph2$trafftype <-"Arrivals"
+
+rm(graphplz)
+rm(graphvra)
+
+# and now count all the departures
+graph3 <- as.data.frame(table(dfgraphA$datumtijdend))
+names(graph3)[names(graph3) == "Freq"] <- "Number_of_Ships"
+
+# count all the arriving plezier
+graphplz <- as.data.frame(table(dfgraphplz$datumtijdend))
+names(graphplz)[names(graphplz) == "Freq"] <- "Number_of_plezier"
+
+# count all the arriving vracht 
+graphvra <- as.data.frame(table(dfgraphvra$datumtijdend))
+names(graphvra)[names(graphvra) == "Freq"] <- "Number_of_vracht"
+
+
+# join up data and get it clean! 
+graph3 <- full_join(graph3, graphplz, by = "Var1")
+graph3 <- full_join(graph3, graphvra, by = "Var1")
+graph3 <- as.data.frame(graph3)
+graph3$Var1 <- as.Date(graph3$Var1)
+
+# change column names
+names(graph3)[names(graph3) == "Var1"] <- "Date"
+
+
+# add type of traffic 
+graph3$trafftype <-"Departures"
+
+# merge all the counts together
+graph <- as.data.frame(rbind(graph1, graph2))
+graph <- as.data.frame(rbind(graph, graph3))
+
+rm(graph1)
+rm(graph2)
+rm(graph3)
+rm(dfgraph)
+rm(dfgraphA)
+
+# replace NAs with 0s 
+
+graph[is.na(graph)] <- 0
+
+# calculate average waterstanden per day per point
+binnen <- Binnenvaartjoin3
+
+bvStartDate <- as.POSIXct("2018-01-01 00:00:00")
+bvEndDate <- as.POSIXct("2019-01-01 00:00:00")
+
+binnen <- filter(binnen, binnen$datumtijdstart > bvStartDate)
+binnen <- filter(binnen, binnen$datumtijdstart < bvEndDate)
+
+
+binnen$datumtijdstart <- as.Date(binnen$datumtijdstart)
+binnen$datumtijdend <- as.Date(binnen$datumtijdend)
+
+binnen1 <- aggregate(start_HAGESTEIN ~ datumtijdstart, binnen, mean)
+binnen2 <- aggregate(start_SURINAME ~ datumtijdstart, binnen, mean)
+binnen3 <- aggregate(start_BUITENHUIZEN ~ datumtijdstart, binnen, mean)
+binnen4 <- aggregate(start_IJMUIDENBUITEN ~ datumtijdstart, binnen, mean)
+binnen5 <- aggregate(start_IJMUIDENSTROOM ~ datumtijdstart, binnen, mean)
+
+binnengemwat <- full_join (binnen1, binnen2, by = "datumtijdstart")
+binnengemwat <- full_join (binnengemwat, binnen3, by = "datumtijdstart")
+binnengemwat <- full_join (binnengemwat, binnen4, by = "datumtijdstart")
+binnengemwat <- full_join (binnengemwat, binnen5, by = "datumtijdstart")
+
+names(binnengemwat)[names(binnengemwat) == "datumtijdstart"] <- "Date"
+
+graph<- full_join(graph, binnengemwat, by = "Date")
+
+
 #-----------------Remove junk tables--------------------------------------------------------------------#
 # Use with caution
 
