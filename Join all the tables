@@ -308,6 +308,30 @@ BinnenvaartvisDiepgang$type_vaart <- BinnenvaartvisDiepgang$Group.2
 BinnenvaartvisDiepgang$mean <- BinnenvaartvisDiepgang$x
 BinnenvaartvisDiepgang$sd <- BinnenvaartvisDiepgang$sd$x
 
+#arrange - dataframe subsetting #Jurgen#
+Binnenvaartjoin3<- Binnenvaartjoin3 %>% arrange(Binnenvaartjoin3$start_WAARNEMINGDATUM)
+#subset
+jan <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-01-01 00:00:00"))
+jan <- subset(jan, datumtijdstart < as.POSIXct("2018-02-01 00:00:00"))
+feb <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-02-01 00:00:00"))
+feb <- subset(feb, datumtijdstart < as.POSIXct("2018-03-01 00:00:00"))
+mar <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-03-01 00:00:00"))
+mar <- subset(mar, datumtijdstart < as.POSIXct("2018-04-01 00:00:00"))
+apr <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-04-01 00:00:00"))
+apr <- subset(apr, datumtijdstart < as.POSIXct("2018-05-01 00:00:00"))
+may <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-05-01 00:00:00"))
+may <- subset(may, datumtijdstart < as.POSIXct("2018-06-01 00:00:00"))
+jun <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-06-01 00:00:00"))
+jun <- subset(jun, datumtijdstart < as.POSIXct("2018-07-01 00:00:00"))
+jul <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-07-01 00:00:00"))
+jul <- subset(jul, datumtijdstart < as.POSIXct("2018-08-01 00:00:00"))
+aug <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-08-01 00:00:00"))
+aug <- subset(aug, datumtijdstart < as.POSIXct("2018-09-01 00:00:00"))
+sep <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-09-01 00:00:00"))
+sep <- subset(sep, datumtijdstart < as.POSIXct("2018-10-01 00:00:00"))
+oct <- subset(Binnenvaartjoin3, datumtijdstart > as.POSIXct("2018-10-01 00:00:00"))
+oct <- subset(oct, datumtijdstart < as.POSIXct("2018-11-01 00:00:00"))
+
 #-----------------Remove junk tables--------------------------------------------------------------------#
 # Use with caution
 
