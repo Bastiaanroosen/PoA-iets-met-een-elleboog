@@ -95,11 +95,11 @@ rm(graphplz)
 rm(graphvra)
 
 # and now count all the departures
-graph3 <- as.data.frame(table(dfgraphvra$datumtijdend))
+graph3 <- as.data.frame(table(dfgraphA$datumtijdend))
 names(graph3)[names(graph3) == "Freq"] <- "Number_of_Ships"
 
 # count all the arriving plezier
-graphplz <- as.data.frame(table(dfgraphvra$datumtijdend))
+graphplz <- as.data.frame(table(dfgraphplz$datumtijdend))
 names(graphplz)[names(graphplz) == "Freq"] <- "Number_of_plezier"
 
 # count all the arriving vracht 
@@ -133,8 +133,3 @@ rm(dfgraphA)
 # replace NAs with 0s 
 
 graph[is.na(graph)] <- 0
-
-# attempt line graph
-ggplot(graph, aes(x=graph$Date, y=graph$Number_of_Ships, group=graph$trafftype)) +
-  geom_line(aes(color=trafftype))+
-  geom_point(aes(color=trafftype))
