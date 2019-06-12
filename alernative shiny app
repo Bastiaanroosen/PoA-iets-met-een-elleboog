@@ -1,0 +1,87 @@
+# Libraries
+library(ggplot2)
+library(shiny)
+
+
+
+# Define UI for slider demo app ----
+ui <- fluidPage(
+  
+  # App title
+  titlePanel("Traffic in the Port of Amsterdam - Binnenvaartschepen"),
+  
+  
+  # Sidebar layout with inputs & outputs
+  sidebarLayout(
+    
+    # Sidebar to make selections
+    sidebarPanel(
+      
+      # Input: select date range over the period 1-1-2018 until 31-10-2018
+      sliderInput("sliderdate", "Selecte date range",
+                  min = as.Date("2018-01-01"),
+                  max = as.Date("2018-10-31"),
+                  value= c(as.Date("2018-01-01"), as.Date("2018-10-31"))),
+      
+      #checkboxGroupInput(inputId = "selecttraf",                                                                               
+      #                 label = h4("Select type of traffic"),                                                                       
+      #                 choices = c("Arrivals", "Departures", "In Harbour")
+      #                 selected = c("Arrivals", "Departures", "In Harbour")),
+      
+      
+      # Input: select type of traffic (pleziervaart or vracht)
+      selectInput(inputId = "selectship", 
+                  label = "Select type of shipping", 
+                  choices = c("Pleziervaart", "Vracht", "Combined"), 
+                  selected = "Combined", 
+                  multiple = FALSE,
+      )
+      
+      
+    ),
+    
+    # Main panel for displaying outputs ----
+    mainPanel(
+      
+      # Output: Table summarizing the values entered ----
+      plotOutput("sliderdate")
+      
+    )
+  )
+)
+
+# Define server logic for slider examples ----
+server <- function(input, output) {
+  
+  # Reactive expression to create data frame of all input values ----
+  # sliderValues <- reactive({
+  
+  
+  
+  # })
+  
+  # Show the values in an HTML table ----
+  output$sliderdate <- renderPlot({
+    
+    # https://stackoverflow.com/questions/45261084/ggplot2-with-reactive-geom-lines
+    
+    
+    ggplot(graph) +
+      geom_line(aes(x=graph$Date, y=switch(input$selectship,
+                                           Combined = graph$Number_of_Ships,
+                                           Pleziervaart = graph$Number_of_plezier,
+                                           Vracht = graph$Number_of_vracht
+      ), group=graph$trafftype, color=trafftype))+   
+      geom_line(aes(graph$Date, graph$start_HAGESTEIN, color = "pink"))+
+      #geom_line(aes(graph$Date, graph$start_BUITENHUIZEN, color = "blue"))+
+      #geom_line(aes(graph$Date, graph$start_SURINAME, color= "purple"))+
+      #geom_line(aes(graph$Date, graph$start_IJMUIDENBUITEN, color = "yellow"))+
+      #geom_line(aes(graph$Date, graph$start_IJMUIDENSTROOM, color = "red"))+   
+      xlim(as.Date(input$sliderdate[1]), as.Date(input$sliderdate[2]))
+    
+  })
+  
+  
+}
+
+shinyApp(server = server, ui = ui)
