@@ -16,6 +16,10 @@ ui <- dashboardPage(
       menuItem("tab2", icon = icon("dashboard"), tabName = "tab2",
                badgeLabel = " ", badgeColor = "green"),
       menuItem("tab3", icon = icon("dashboard"), tabName = "tab3",
+               badgeLabel = " ", badgeColor = "green"),
+      menuItem("tab4", icon = icon("dashboard"), tabName = "tab4",
+               badgeLabel = " ", badgeColor = "green"),
+      menuItem("tab5", icon = icon("dashboard"), tabName = "tab5",
                badgeLabel = " ", badgeColor = "green")
       
     )
@@ -36,14 +40,35 @@ ui <- dashboardPage(
       ),
       #tab2
       tabItem(tabName = "tab2",
-              
               h2("tab2")
+              #####
               
+              #####
       ),
       #tab3
       tabItem(tabName = "tab3",
-              
               h2("tab3")
+              #####
+              
+              #####
+              
+      ),
+      
+      #tab4
+      tabItem(tabName = "tab4",
+              h2("tab4")
+              #####
+              
+              #####
+              
+      ),
+      
+      #tab5
+      tabItem(tabName = "tab5",
+              h2("tab5")
+              #####
+              
+              #####
               
       )
       
