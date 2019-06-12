@@ -133,3 +133,32 @@ rm(dfgraphA)
 # replace NAs with 0s 
 
 graph[is.na(graph)] <- 0
+
+# calculate average waterstanden per day per point
+binnen <- Binnenvaartjoin3
+
+bvStartDate <- as.POSIXct("2018-01-01 00:00:00")
+bvEndDate <- as.POSIXct("2019-01-01 00:00:00")
+
+binnen <- filter(binnen, binnen$datumtijdstart > bvStartDate)
+binnen <- filter(binnen, binnen$datumtijdstart < bvEndDate)
+
+
+binnen$datumtijdstart <- as.Date(binnen$datumtijdstart)
+binnen$datumtijdend <- as.Date(binnen$datumtijdend)
+
+binnen1 <- aggregate(start_HAGESTEIN ~ datumtijdstart, binnen, mean)
+binnen2 <- aggregate(start_SURINAME ~ datumtijdstart, binnen, mean)
+binnen3 <- aggregate(start_BUITENHUIZEN ~ datumtijdstart, binnen, mean)
+binnen4 <- aggregate(start_IJMUIDENBUITEN ~ datumtijdstart, binnen, mean)
+binnen5 <- aggregate(start_IJMUIDENSTROOM ~ datumtijdstart, binnen, mean)
+
+binnengemwat <- full_join (binnen1, binnen2, by = "datumtijdstart")
+binnengemwat <- full_join (binnengemwat, binnen3, by = "datumtijdstart")
+binnengemwat <- full_join (binnengemwat, binnen4, by = "datumtijdstart")
+binnengemwat <- full_join (binnengemwat, binnen5, by = "datumtijdstart")
+
+names(binnengemwat)[names(binnengemwat) == "datumtijdstart"] <- "Date"
+
+graph<- full_join(graph, binnengemwat, by = "Date")
+
