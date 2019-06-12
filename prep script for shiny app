@@ -3,6 +3,8 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
+
+#==================== Prep shiny app - Arrivals, Departures, Number of Binnenvaartschepen in de Haven ================
 # remove all ships that do not fall with the vracht of pleziervaart categories
 
 date0 <- Binnenvaartjoin3[which(Binnenvaartjoin3$Type_Vaart != "NA"),]
