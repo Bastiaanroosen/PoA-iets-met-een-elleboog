@@ -1,0 +1,50 @@
+# Libraries
+library(ggplot2)
+library(shiny)
+
+# Define UI for slider demo app ----
+ui <- fluidPage(
+    
+    # App title
+    titlePanel("Docking duration average + standard deviation based on size of boat"),
+    
+    # Sidebar layout with inputs & outputs
+    sidebarLayout(
+        
+        # Sidebar to make selections
+        sidebarPanel(
+            
+            # Input: select type of size of boat
+            selectInput(inputId = "selectSize", 
+                        label = "Select which type of size you would like to see", 
+                        choices = c("Inhoud", "Lengte", "Breedte", "Diepgang"), 
+                        selected = "Inhoud", 
+                        multiple = FALSE,
+            )
+        ),
+        
+        # Main panel for displaying outputs ----
+        mainPanel(
+            plotOutput("ligtijden")
+            
+        )
+    )
+)
+
+# Define server logic for slider examples ----
+server <- function(input, output) {
+    
+    # Plot
+    output$ligtijden <- renderPlot({
+        #switch dataframe based on output
+        afmeting <- switch(input$selectSize, Inhoud= BinnenvaartvisInhoud, Lengte= BinnenvaartvisLengte, Breedte= BinnenvaartvisBreedte, Diepgang= BinnenvaartvisDiepgang)
+        
+        ggplot(afmeting) + 
+            geom_line(aes(x=categorieBoatSize, y=mean, group=type_vaart, color=type_vaart), size=0.8)+
+            geom_errorbar(aes(x=categorieBoatSize, ymin=mean-sd, ymax=mean+sd, color=type_vaart), width=.1, position=position_dodge(0.05)) +
+            geom_point(aes(x=categorieBoatSize, y=mean, color=type_vaart))+
+            scale_color_brewer(palette="Dark2")
+        })
+        }
+
+shinyApp(server = server, ui = ui)
