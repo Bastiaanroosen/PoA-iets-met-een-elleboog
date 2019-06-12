@@ -23,10 +23,10 @@ ui <- fluidPage(
                   max = as.Date("2018-10-31"),
                   value= c(as.Date("2018-01-01"), as.Date("2018-10-31"))),
       
-      checkboxGroupInput(inputId = "selecttraf",                                                                               
-                         label = h4("Select type of traffic"),                                                                       
-                         choices = c("Arrivals", "Departures", "In Harbour")
-                         selected = c("Arrivals", "Departures", "In Harbour")),
+      #checkboxGroupInput(inputId = "selecttraf",                                                                               
+        #                 label = h4("Select type of traffic"),                                                                       
+        #                 choices = c("Arrivals", "Departures", "In Harbour")
+        #                 selected = c("Arrivals", "Departures", "In Harbour")),
       
       
       # Input: select type of traffic (pleziervaart or vracht)
@@ -80,3 +80,4 @@ server <- function(input, output) {
 }
 
 shinyApp(server = server, ui = ui)
+
