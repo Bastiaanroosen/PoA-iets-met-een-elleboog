@@ -13,7 +13,7 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Waterstanden vs ligtijden", icon = icon("dashboard"), tabName = "Waterstanden",
                badgeLabel = " ", badgeColor = "green"),
-      menuItem("tab2", icon = icon("dashboard"), tabName = "tab2",
+      menuItem("Traffic in the PoA", icon = icon("dashboard"), tabName = "Traffic",
                badgeLabel = " ", badgeColor = "green"),
       menuItem("tab3", icon = icon("dashboard"), tabName = "tab3",
                badgeLabel = " ", badgeColor = "green"),
@@ -39,8 +39,8 @@ ui <- dashboardPage(
               fluidRow(box(sliderInput("month", "Data per maand", 1,10,1,1)))
       ),
       #tab2
-      tabItem(tabName = "tab2",
-              h2("tab2"),
+      tabItem(tabName = "Traffic",
+              h2("Traffic in the Port of Amsterdam - Binnenvaartschepen"),
               #####
               #####Xanne####
               fluidRow(box(# Output: Table summarizing the values entered ----
