@@ -17,7 +17,7 @@ ui <- dashboardPage(
                badgeLabel = " ", badgeColor = "green"),
       menuItem("tab3", icon = icon("dashboard"), tabName = "tab3",
                badgeLabel = " ", badgeColor = "green"),
-      menuItem("tab4", icon = icon("dashboard"), tabName = "tab4",
+      menuItem("waterstanden per periode", icon = icon("dashboard"), tabName = "waterstperiode",
                badgeLabel = " ", badgeColor = "green"),
       menuItem("tab5", icon = icon("dashboard"), tabName = "tab5",
                badgeLabel = " ", badgeColor = "green")
@@ -77,11 +77,19 @@ ui <- dashboardPage(
       ),
       
       #tab4
-      tabItem(tabName = "tab4",
-              h2("tab4")
-              #####
+      tabItem(tabName = "waterstperiode",
+              h2("Waterstanden per periode"),
+              #####Jacques#####
               
-              #####
+              fluidRow(box(selectInput('xcol', 'Datum', width = 300, names(df_tijden),
+                                       selected = names(df_tijden)[[1]]),
+                           selectInput('ycol', 'Locaties', width = 300, names(df_havens),
+                                       selected = names(df_havens)[[1]]),
+                           sliderInput("maand", "Data per maand", width = 300, 1,10,1,1)
+              ),box((plotlyOutput('plot1'))),
+              
+              fluidRow(box(),box(plotlyOutput('plot2')))) 
+              #####Jacques#####
               
       ),
       
@@ -168,6 +176,31 @@ server <- function(input, output) {
   })
   
   #####Xanne#####
+  
+  #####Jacques#####
+  output$plot1 <- renderPlotly({
+    p <- ggplot(waterstanden_jac_clean, aes(x=waterstanden_jac_clean[ , input$xcol],y= waterstanden_jac_clean[ , input$ycol])) + geom_line()
+    p + labs(x = "Datum", y = "Locatie" )
+  })
+  
+  output$plot2 <- renderPlotly({
+    maand <- switch(
+      input$maand,
+      m01,
+      m02,
+      m03,
+      m04,
+      m05,
+      m06,
+      m07,
+      m08,
+      m09,
+      m10
+    )
+    p <- ggplot(maand, aes(x=maand[ , input$xcol],y= maand[ , input$ycol])) + geom_line()
+    p + labs(x = "Datum", y = "Locatie" )
+  })
+  #####Jacques#####
 }
 
 shinyApp(ui, server)
