@@ -1,0 +1,131 @@
+# ------------------------------- # JOOOOIN ---------------------------------------------------------------------------------------------------------------------------------
+
+library(dplyr)
+
+#-----------------create waterstanden tables for 2x join met start en eind------------------------------#
+
+waterstanden1$datumtijd <- as.POSIXct(waterstanden1$datumtijd)
+df2_Waterstanden_start <- waterstanden1
+colnames(df2_Waterstanden_start) <- paste("start", colnames(df2_Waterstanden_start), sep = "_")
+
+df2_Waterstanden_end <- waterstanden1
+colnames(df2_Waterstanden_end) <- paste("end", colnames(df2_Waterstanden_end), sep = "_")
+
+#---------------------JOIN Binnenvaart met waterstanden en scheepsgegevens---------------------#
+
+Binnenvaartjoin1 <- left_join(df2_IRS_VESSELVISIT_VW_clean, df2_binnenvaartschepen, by = c("BARGE_NUMBER" = "ENI_Nummer"))
+Binnenvaartjoin2 <- left_join(Binnenvaartjoin1, df2_Waterstanden_start, by = c("datumtijdstart" = "start_datumtijd"))
+Binnenvaartjoin3 <- left_join(Binnenvaartjoin2, df2_Waterstanden_end, by = c("datumtijdend" = "end_datumtijd"))
+
+#Remove all cases without a Barge Number and Scheepsnaam
+Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$BARGE_NUMBER),]
+Binnenvaartjoin3 <- Binnenvaartjoin3[complete.cases(Binnenvaartjoin3$Scheepsnaam),]
+
+library(dplyr)
+
+bvStartDate <- as.POSIXct("2018-01-01 00:00:00")
+bvEndDate <- as.POSIXct("2019-01-01 00:00:00")
+
+date1 <- filter(Binnenvaartjoin3, Binnenvaartjoin3$datumtijdstart > bvStartDate)
+date2 <- filter(date1, date1$datumtijdstart < bvEndDate)
+
+
+
+#maak nieuwe DF voor visual
+Binnenvaartvisual <- select(date1, c(BARGE_NUMBER, Scheepsnaam,Bouwjaar, Scheepstype, Type_Vaart, Tonnage, Lengte, Breedte, Diepgang,datumtijdstart, datumtijdend,hoursberth))
+Binnenvaartvisual$Inhoud = as.numeric(Binnenvaartvisual$Breedte)*as.numeric(Binnenvaartvisual$Lengte)*as.numeric(Binnenvaartvisual$Diepgang)
+Binnenvaartvisual$Lengte <- as.numeric(Binnenvaartvisual$Lengte)
+Binnenvaartvisual$Breedte <- as.numeric(Binnenvaartvisual$Breedte)
+Binnenvaartvisual$Diepgang <- as.numeric(Binnenvaartvisual$Diepgang)
+
+#Categorien inhoud
+quantile(Binnenvaartvisual$Inhoud, c(0,.10, .20, .30, .40,.50,.60,.70,.80,.90,1),na.rm = TRUE) 
+Binnenvaartvisual$inhoudcat <- Binnenvaartvisual$Inhoud
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud < 130658600 ] = "A"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 130658600 & Binnenvaartvisual$Inhoud < 552960000] = "B"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 552960000 & Binnenvaartvisual$Inhoud < 1037142720] = "C"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 1037142720 & Binnenvaartvisual$Inhoud < 1412327000 ] = "D"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 1412327000 & Binnenvaartvisual$Inhoud < 1918473700 ] = "E"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 1918473700 & Binnenvaartvisual$Inhoud < 2430479088 ] = "F"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 2430479088 & Binnenvaartvisual$Inhoud < 3171893250 ] = "G"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 3171893250 & Binnenvaartvisual$Inhoud < 4292942775] = "H"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 4292942775 & Binnenvaartvisual$Inhoud < 4660150000 ] = "I"
+Binnenvaartvisual$inhoudcat [Binnenvaartvisual$Inhoud >= 4660150000 ] = "J"
+table(Binnenvaartvisual$inhoudcat)
+
+#Categorien lengte
+quantile(Binnenvaartvisual$Lengte, c(0,.10, .20, .30, .40,.50,.60,.70,.80,.90,1),na.rm = TRUE) 
+Binnenvaartvisual$lengtecat <- Binnenvaartvisual$Lengte
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte < 1985.0   ] = "A"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 1985.0   & Binnenvaartvisual$Lengte < 4007.6] = "B"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 4007.6 & Binnenvaartvisual$Lengte < 5994.0  ] = "C"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 5994.0   & Binnenvaartvisual$Lengte < 6996.0  ] = "D"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 6996.0   & Binnenvaartvisual$Lengte < 8000.0  ] = "E"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 8000.0   & Binnenvaartvisual$Lengte < 8589.0 ] = "F"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 8589.0  & Binnenvaartvisual$Lengte < 10483.0 ] = "G"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 10483.0  & Binnenvaartvisual$Lengte < 10998.0] = "H"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 10998.0  & Binnenvaartvisual$Lengte < 11000.0] = "I"
+Binnenvaartvisual$lengtecat [Binnenvaartvisual$Lengte >= 11000.0 ] = "J"
+table(Binnenvaartvisual$lengtecat)
+
+#Categorien breedte
+quantile(Binnenvaartvisual$Breedte, c(0,.10, .20, .30, .40,.50,.60,.70,.80,.90,1),na.rm = TRUE) 
+Binnenvaartvisual$breedtecat <- Binnenvaartvisual$Breedte
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte < 427] = "A"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 427 & Binnenvaartvisual$Breedte < 659  ] = "B"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 659 & Binnenvaartvisual$Breedte < 720    ] = "C"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 720 & Binnenvaartvisual$Breedte < 820    ] = "D"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 820 & Binnenvaartvisual$Breedte < 900    ] = "E"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 900 & Binnenvaartvisual$Breedte < 950 ] = "F"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 950 & Binnenvaartvisual$Breedte < 1137  ] = "G"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 1137 & Binnenvaartvisual$Breedte < 1145 ] = "H"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 1145 & Binnenvaartvisual$Breedte < 1145 ] = "I"
+Binnenvaartvisual$breedtecat [Binnenvaartvisual$Breedte >= 1145 ] = "J"
+table(Binnenvaartvisual$breedtecat)
+
+#Categorien diepgang
+quantile(Binnenvaartvisual$Diepgang, c(0,.10, .20, .30, .40,.50,.60,.70,.80,.90,1),na.rm = TRUE) 
+Binnenvaartvisual$diepgangcat <- Binnenvaartvisual$Diepgang
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang < 150  ] = "A"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 150   & Binnenvaartvisual$Diepgang < 210    ] = "B"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 210   & Binnenvaartvisual$Diepgang < 252      ] = "C"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 252   & Binnenvaartvisual$Diepgang < 264    ] = "D"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 264 & Binnenvaartvisual$Diepgang < 280      ] = "E"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 280   & Binnenvaartvisual$Diepgang < 302   ] = "F"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 302   & Binnenvaartvisual$Diepgang < 320  ] = "G"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 320 & Binnenvaartvisual$Diepgang < 350   ] = "H"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 350   & Binnenvaartvisual$Diepgang < 366   ] = "I"
+Binnenvaartvisual$diepgangcat [Binnenvaartvisual$Diepgang >= 366   ] = "J"
+table(Binnenvaartvisual$diepgangcat)
+
+#mean sd berekenen inhoud
+BinnenvaartvisInhoud <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$inhoudcat, Binnenvaartvisual$Type_Vaart), mean)
+BinnenvaartvisInhoud$sd <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$inhoudcat, Binnenvaartvisual$Type_Vaart), sd)
+BinnenvaartvisInhoud$categorieBoatSize <- BinnenvaartvisInhoud$Group.1
+BinnenvaartvisInhoud$type_vaart <- BinnenvaartvisInhoud$Group.2
+BinnenvaartvisInhoud$mean <- BinnenvaartvisInhoud$x
+BinnenvaartvisInhoud$sd <- BinnenvaartvisInhoud$sd$x
+
+#mean sd berekenen lengte
+BinnenvaartvisLengte <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$lengtecat, Binnenvaartvisual$Type_Vaart), mean)
+BinnenvaartvisLengte$sd <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$lengtecat, Binnenvaartvisual$Type_Vaart), sd)
+BinnenvaartvisLengte$categorieBoatSize <- BinnenvaartvisLengte$Group.1
+BinnenvaartvisLengte$type_vaart <- BinnenvaartvisLengte$Group.2
+BinnenvaartvisLengte$mean <- BinnenvaartvisLengte$x
+BinnenvaartvisLengte$sd <- BinnenvaartvisLengte$sd$x
+
+#mean sd berekenen breedte
+BinnenvaartvisBreedte <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$breedtecat, Binnenvaartvisual$Type_Vaart), mean)
+BinnenvaartvisBreedte$sd <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$breedtecat, Binnenvaartvisual$Type_Vaart), sd)
+BinnenvaartvisBreedte$categorieBoatSize <- BinnenvaartvisBreedte$Group.1
+BinnenvaartvisBreedte$type_vaart <- BinnenvaartvisBreedte$Group.2
+BinnenvaartvisBreedte$mean <- BinnenvaartvisBreedte$x
+BinnenvaartvisBreedte$sd <- BinnenvaartvisBreedte$sd$x
+
+#mean sd berekenen diepgang
+BinnenvaartvisDiepgang <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$diepgangcat, Binnenvaartvisual$Type_Vaart), mean)
+BinnenvaartvisDiepgang$sd <- aggregate(Binnenvaartvisual$hoursberth, list(Binnenvaartvisual$diepgangcat, Binnenvaartvisual$Type_Vaart), sd)
+BinnenvaartvisDiepgang$categorieBoatSize <- BinnenvaartvisDiepgang$Group.1
+BinnenvaartvisDiepgang$type_vaart <- BinnenvaartvisDiepgang$Group.2
+BinnenvaartvisDiepgang$mean <- BinnenvaartvisDiepgang$x
+BinnenvaartvisDiepgang$sd <- BinnenvaartvisDiepgang$sd$x
