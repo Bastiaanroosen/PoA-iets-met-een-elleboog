@@ -43,7 +43,8 @@ ui <- dashboardPage(
               h2("Traffic in the Port of Amsterdam - Binnenvaartschepen"),
               #####
               #####Xanne####
-              fluidRow(box(# Output: Table summarizing the values entered ----
+              fluidRow(box(width = 500,
+                # Output: Table summarizing the values entered ----
                            plotOutput("sliderdate"))),
               fluidRow(box(# Input: select date range over the period 1-1-2018 until 31-10-2018
                 sliderInput("sliderdate", "Selecte date range",
@@ -100,11 +101,11 @@ ui <- dashboardPage(
               h2("Waterstanden per periode"),
               #####Jacques#####
               
-              fluidRow(box(selectInput('xcol', 'Datum', width = 300, names(df_tijden),
+              fluidRow(box(selectInput('xcol', 'Datum', names(df_tijden),
                                        selected = names(df_tijden)[[1]]),
-                           selectInput('ycol', 'Locaties', width = 300, names(df_havens),
+                           selectInput('ycol', 'Locaties', names(df_havens),
                                        selected = names(df_havens)[[1]]),
-                           sliderInput("maand", "Data per maand", width = 300, 1,10,1,1)
+                           sliderInput("maand", "Data per maand",1,10,1,1)
               ),box((plotlyOutput('plot1'))),
               
               fluidRow(box(),box(plotlyOutput('plot2')))) 
