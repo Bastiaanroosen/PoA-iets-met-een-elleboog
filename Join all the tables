@@ -1,6 +1,9 @@
 # ------------------------------- # JOOOOIN ---------------------------------------------------------------------------------------------------------------------------------
 
+#load libraries
+library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 #-----------------create waterstanden tables for 2x join met start en eind------------------------------#
 
@@ -46,10 +49,7 @@ Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Arrivaldelay < 864000)
 Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Departuredelay > -864000)    
 Scheepsvaart <- filter(Scheepsvaart, Scheepsvaart$Departuredelay < 864000) 
 
-#load libraries
-library(ggplot2)
-library(dplyr)
-library(tidyr)
+
 
 
 #==================== Prep shiny app - Arrivals, Departures, Number of Binnenvaartschepen in de Haven ================
@@ -69,11 +69,6 @@ date3 <- filter(date2, date2$datumtijdstart < bvEndDate)
 date4 <- filter(date3, date1$datumtijdend < bvEndDate)
 
 dfgraph <- date4
-
-rm(date1)
-rm(date2)
-rm(date3)
-rm(date4)
 
 #create df to use for counting
 x <- c("datumtijdstart", "datumtijdend", "comm_id", "Type_Vaart")
@@ -141,9 +136,6 @@ names(graph2)[names(graph2) == "Var1"] <- "Date"
 # add type of traffic 
 graph2$trafftype <-"Arrivals"
 
-rm(graphplz)
-rm(graphvra)
-
 # and now count all the departures
 graph3 <- as.data.frame(table(dfgraphA$datumtijdend))
 names(graph3)[names(graph3) == "Freq"] <- "Number_of_Ships"
@@ -174,11 +166,7 @@ graph3$trafftype <-"Departures"
 graph <- as.data.frame(rbind(graph1, graph2))
 graph <- as.data.frame(rbind(graph, graph3))
 
-rm(graph1)
-rm(graph2)
-rm(graph3)
-rm(dfgraph)
-rm(dfgraphA)
+
 
 # replace NAs with 0s 
 
@@ -361,3 +349,20 @@ oct <- subset(oct, datumtijdstart < as.POSIXct("2018-11-01 00:00:00"))
 #rm(Scheepsvaart)
 #rm(rs)
 #rm(waterstanden1)
+rm(graphplz)
+rm(graphvra)
+rm(date1)
+rm(date2)
+rm(date3)
+rm(date4)
+rm(graph1)
+rm(graph2)
+rm(graph3)
+rm(dfgraph)
+rm(dfgraphA)
+rm(date1)
+rm(date2)
+rm(date3)
+rm(date4)
+rm(graphplz)
+rm(graphvra)
