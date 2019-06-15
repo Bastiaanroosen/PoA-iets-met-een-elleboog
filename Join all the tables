@@ -203,6 +203,9 @@ graph<- full_join(graph, binnengemwat, by = "Date")
 #-----------------Prep shiny Binnenvaartschepen vs ligtijden-----------------------#
 Binnenvaartvisual <- select(date1, c(BARGE_NUMBER, Scheepsnaam,Bouwjaar, Scheepstype, Type_Vaart, Tonnage, Lengte, Breedte, Diepgang,datumtijdstart, datumtijdend,hoursberth))
 Binnenvaartvisual$Inhoud = as.numeric(Binnenvaartvisual$Breedte)*as.numeric(Binnenvaartvisual$Lengte)*as.numeric(Binnenvaartvisual$Diepgang)
+Binnenvaartvisual$Lengte <- as.numeric(Binnenvaartvisual$Lengte)
+Binnenvaartvisual$Breedte <- as.numeric(Binnenvaartvisual$Breedte)
+Binnenvaartvisual$Diepgang <- as.numeric(Binnenvaartvisual$Diepgang)
 
 #Categorien inhoud
 quantile(Binnenvaartvisual$Inhoud, c(0,.10, .20, .30, .40,.50,.60,.70,.80,.90,1),na.rm = TRUE) 
