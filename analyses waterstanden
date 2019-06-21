@@ -1,0 +1,37 @@
+#--------------------------waterstanden analyse------------------------------------------------------------------
+# create new df 
+waterstanden <- df2_Waterstanden
+
+# generate histograms of the different measureing points 
+
+# generate hagestein plot
+hist(waterstanden$Hagestein_beneden)
+
+# calculate mean hagestein
+mean(waterstanden$Hagestein_beneden)
+
+
+#generate ijmuiden buiten plot
+hist(waterstanden$IJmuiden_buitenhaven)
+
+# calculate mean ijmuiden buiten
+mean(waterstanden$IJmuiden_buitenhaven)
+
+
+#generate ijmuiden stroompaal plot
+hist(waterstanden$IJmuiden_stroommeetpaal)
+
+#calculate mean ijmuiden stroom
+mean(waterstanden$IJmuiden_stroommeetpaal)
+
+#generate surinamekade plot
+hist(waterstanden$SURINAME)
+
+#calculate mean surinamekade
+mean(waterstanden$SURINAME)
+
+#generate buitenhuizen plot
+hist(waterstanden$BUITENHUIZEN)
+
+#calculate mean buitenhuizen
+mean(waterstanden$BUITENHUIZEN)
