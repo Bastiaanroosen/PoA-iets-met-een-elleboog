@@ -1,0 +1,75 @@
+### Created by Rafaella Keyzer ### ### Modified and improved by Jurgen Smart ###
+library(sparklyr)
+library(mongolite)
+library(dplyr)
+library(ROCR)
+library(dplyr)
+library(lattice)
+library(caret)
+library(rvest)
+library(e1071)
+library(DBI)
+library(RMySQL)
+library(sentimentr)
+library(naivebayes)
+library(ggplot2)
+library(psych)
+library(xml2)
+library(pander)
+library(stringr)
+library(tm)
+library(corpus)
+library(wordcloud)
+
+setwd("D:/Users/J-A-J/Desktop/HVA Projecten/Jaar 2/Blok 3 en Blok 4/Project Big Data/Individual-Assignment2")
+getwd()
+
+balanced_con <- mongo(collection="all_reviews", db="hotel_reviews",url="mongodb://localhost")
+balanced_reviews <- balanced_con$find('{}')
+balanced_reviews <- select (balanced_reviews, c(Classb, Review))
+
+sc <- spark_connect(master = "local")
+
+review_tbl <- copy_to(sc, balanced_reviews, overwrite=TRUE)
+
+glimpse(review_tbl)
+
+#Split into training and test sets
+partitions <- review_tbl %>% sdf_random_split(training= 0.7,testing= 0.3,seed = 11)
+
+
+
+
+#Create pipeline with transformers and estimators by choice
+bayes_pipeline <- ml_pipeline(sc) %>%
+  ft_tokenizer(input_col = "Review", output_col = "words") %>%
+  ft_stop_words_remover(input_col = "words", output_col = "filtered_words") %>%
+  ft_count_vectorizer(input_col = 'filtered_words', output_col = 'vocab', binary=TRUE) %>%
+  ml_naive_bayes(sc, label_col = "Classb", 
+                 features_col = "vocab", 
+                 prediction_col = "pcol",
+                 probability_col = "prcol", 
+                 raw_prediction_col = "rpcol",
+                 model_type = "multinomial", 
+                 uid = "nb")
+
+
+#Fit the pipeline to create a pipline model, pass training set to train model
+bayes_model <- ml_fit(bayes_pipeline, partitions$training)
+
+#Equal to base predict function, pass pipeline model and test set, or any piece of text for new predictions
+bayes_predictions <- ml_transform(bayes_model, partitions$testing)
+glimpse(bayes_predictions)
+
+
+#Display accuracy using evaluator function from mllib
+ml_multiclass_classification_evaluator(bayes_predictions, label_col = "Classb", prediction_col = "pcol", metric = "accuracy")
+
+
+#Collect predictions from spark cluster to calculate accuracy and create confusion matrix
+collected_bayes <- bayes_predictions  %>% select(Classb, pcol) %>% collect()
+
+#Create confusion matrix and calculate accuracy
+confBayes <- table("Predictions" = collected_bayes$pcol, "Actual" = collected_bayes$Classb)
+confBayes
+sum(diag(confBayes))/sum(confBayes)
