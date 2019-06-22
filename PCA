@@ -1,3 +1,6 @@
+library(ggplot2)
+library(stats)
+
 #Make sure all relevant columns are numeric
 
 Binnenvaartjoin3[,c(12)] <- as.numeric(Binnenvaartjoin3[,c(12)])
@@ -14,10 +17,7 @@ str(Binnenvaartjoin3)
 summary(binnenvaartPCA)
 print(binnenvaartPCA)
 
-#biplot of PCA
-library(ggplot2)
-library(stats)
-biplot(binnenvaartPCA)
+
 
 #Elbow graph
 printvariance <- binnenvaartPCA$sdev^2
