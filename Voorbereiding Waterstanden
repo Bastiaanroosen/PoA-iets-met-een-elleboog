@@ -1,8 +1,8 @@
 library(dplyr)
 
 #import CSVs allestanden in de haven, de rijn en de zee
-havenwaterstand <- read.csv("C:/Users/Bastiaan.Roosen/Documents/ICT Deeltijd studie/Jaar 2 Big Data/Big Data MJJBX/Raw Data/20190322_025.csv", sep = ";")
-rijnenzeestand <- read.csv("C:/Users/Bastiaan.Roosen/Documents/ICT Deeltijd studie/Jaar 2 Big Data/Big Data MJJBX/Raw Data/20190322_029.csv", sep = ";")
+havenwaterstand <- read.csv("#voeg map hier in", sep = ";")
+rijnenzeestand <- read.csv("#voeg map hier in", sep = ";")
 
 #combine allestanden haven with rijn and zee. 
 allestanden <- rbind(havenwaterstand, rijnenzeestand)
