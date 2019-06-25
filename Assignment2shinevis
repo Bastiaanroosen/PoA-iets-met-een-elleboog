@@ -52,7 +52,7 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Spark Mongo Bayes", icon = icon("dashboard"), tabName = "Sparongobayes",
                badgeLabel = " ", badgeColor = "green")
-     # menuItem("tab2", icon = icon("dashboard"), tabName = "tab2",
+      # menuItem("tab2", icon = icon("dashboard"), tabName = "tab2",
       #         badgeLabel = " ", badgeColor = "green"),
       #menuItem("tab3", icon = icon("dashboard"), tabName = "tab3",
       #         badgeLabel = " ", badgeColor = "green"),
@@ -75,13 +75,14 @@ ui <- dashboardPage(
               
               fluidRow(box(title = "Review locations",
                            collapsible = TRUE,
-                          width = "100%",
-                         height = "100%",
-                           leafletOutput("hotel_map")))
+                           width = "40%",
+                           height = "40%",
+                           leafletOutput("hotel_map")),(box(plotlyOutput("hotelscr"))))
               
-   #          fluidRow(box(plotlyOutput("hotelscr")))
               
-   #          fluidRow(box(sliderInput("years", "Data per maand", 1,3,1,1)))
+                        
+              
+              #          fluidRow(box(sliderInput("years", "Data per maand", 1,3,1,1)))
               
               #####
       )
@@ -95,31 +96,31 @@ ui <- dashboardPage(
 server <- function(input, output) {
   
   
-  #output$hotelscr <- renderPlotly({
-    
- #   years <- switch(
+  output$hotelscr <- renderPlotly({
+  
+  #   years <- switch(
   #    input$years,
-   #   Y2015,
+  #   Y2015,
   #    Y2016,
   #    Y2017,
-   # )
-    
-  #  hotelscore  <- ggplot(years, aes(x= balanced_reviews$Hotel_Name, y= balanced_reviews$Average_Score)) + geom_point() + theme(axis.text.x = element_text(angle=45, hjust=1))
-#  })
+  # )
+  
+    hotelscore  <- ggplot(balanced_reviews, aes(x= balanced_reviews$Hotel_Name, y= balanced_reviews$Average_Score)) + geom_point() + theme(axis.text.x = element_text(angle=45, hjust=1))
+    })
   
   
- 
+  
   
   output$hotel_map <- renderLeaflet({
-    leaflet(height = "100%", width = "100%") %>% addTiles() %>% setView(lng =15.08, lat =50.00, zoom = 4) %>% addMarkers(lng=balanced_reviews$lng, lat=balanced_reviews$lat, popup=balanced_reviews$Hotel_Name) %>%addWMSTiles(
+    leaflet(height = "40%", width = "40%") %>% addTiles() %>% setView(lng =15.08, lat =50.00, zoom = 4) %>% addMarkers(lng=balanced_reviews$lng, lat=balanced_reviews$lat, popup=balanced_reviews$Hotel_Name) %>%addWMSTiles(
       "http://62.236.121.188/arcgis/services/DataAndMaps/Background/MapServer/WMSServer?",
       layers = "11",
       options = WMSTileOptions(
-  format = "image/png",
-       transparent = TRUE,
+        format = "image/png",
+        transparent = TRUE,
       ),
-     attribution = "Catchment area provided by HELCOM"
-   )
+      attribution = "Catchment area provided by HELCOM"
+    )
   })
   
   
