@@ -1,0 +1,128 @@
+### Modified and improved by Jurgen Smart ###
+## app.R ##
+library(shiny)
+library(shinydashboard)
+library(plotly)
+library(leaflet)
+library(ggplot2)
+library(sparklyr)
+library(mongolite)
+library(dplyr)
+library(ROCR)
+library(lattice)
+library(caret)
+library(rvest)
+library(e1071)
+library(DBI)
+library(RMySQL)
+library(naivebayes)
+library(psych)
+library(xml2)
+library(pander)
+library(stringr)
+library(tm)
+library(corpus)
+library(tidyr)
+
+setwd("D:/Users/J-A-J/Desktop/HVA Projecten/Jaar 2/Blok 3 en Blok 4/Project Big Data/Individual-Assignment2")
+getwd()
+
+
+balanced_con2 <- mongo(collection="all_reviews_complete", db="hotel_reviews",url="mongodb://localhost")
+
+balanced_reviews <- balanced_con2$find('{}')
+balanced_reviews <- na.omit(balanced_reviews)
+balanced_reviews <- balanced_reviews %>% group_by(Hotel_Name,Hotel_Address, lat, lng) %>% summarise(Average_Score =mean(Average_Score), Additional_Number_of_Scoring = mean(Additional_Number_of_Scoring))
+balanced_reviews <- balanced_reviews[complete.cases(balanced_reviews),]
+
+#Add year column
+#balanced_reviews$Year <- as.Date(balanced_reviews$Review_Date, format="%m/%d/%Y")
+#balanced_reviews$Year <- format(as.Date(balanced_reviews$Year, format="%m/%d/%Y"),"%Y")
+
+
+#subset
+#Y2015 <- subset(balanced_reviews, as.integer(balanced_reviews$Year) < "2016")
+#Y2016 <- subset(balanced_reviews, (as.integer(balanced_reviews$Year) > "2015" & as.integer(balanced_reviews$Year) < "2017"))
+#Y2017 <- subset(balanced_reviews, (as.integer(balanced_reviews$Year) > "2016" & as.integer(balanced_reviews$Year) < "2018"))
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Spark Mongo Bayes"),
+  dashboardSidebar(
+    
+    sidebarMenu(
+      menuItem("Spark Mongo Bayes", icon = icon("dashboard"), tabName = "Sparongobayes",
+               badgeLabel = " ", badgeColor = "green")
+     # menuItem("tab2", icon = icon("dashboard"), tabName = "tab2",
+      #         badgeLabel = " ", badgeColor = "green"),
+      #menuItem("tab3", icon = icon("dashboard"), tabName = "tab3",
+      #         badgeLabel = " ", badgeColor = "green"),
+      #menuItem("tab4", icon = icon("dashboard"), tabName = "tab4",
+      #         badgeLabel = " ", badgeColor = "green"),
+      #menuItem("tab5", icon = icon("dashboard"), tabName = "tab5",
+      #         badgeLabel = " ", badgeColor = "green")
+      
+    )
+    
+  ),
+  dashboardBody(
+    
+    #tabs
+    tabItems(
+      #tab1
+      tabItem(tabName = "Sparongobayes",
+              h2("Spark Mongo Bayes"),
+              #####
+              
+              fluidRow(box(title = "Review locations",
+                           collapsible = TRUE,
+                          width = "100%",
+                         height = "100%",
+                           leafletOutput("hotel_map")))
+              
+   #          fluidRow(box(plotlyOutput("hotelscr")))
+              
+   #          fluidRow(box(sliderInput("years", "Data per maand", 1,3,1,1)))
+              
+              #####
+      )
+      
+    )
+    
+    
+  )
+)
+
+server <- function(input, output) {
+  
+  
+  #output$hotelscr <- renderPlotly({
+    
+ #   years <- switch(
+  #    input$years,
+   #   Y2015,
+  #    Y2016,
+  #    Y2017,
+   # )
+    
+  #  hotelscore  <- ggplot(years, aes(x= balanced_reviews$Hotel_Name, y= balanced_reviews$Average_Score)) + geom_point() + theme(axis.text.x = element_text(angle=45, hjust=1))
+#  })
+  
+  
+ 
+  
+  output$hotel_map <- renderLeaflet({
+    leaflet(height = "100%", width = "100%") %>% addTiles() %>% setView(lng =15.08, lat =50.00, zoom = 4) %>% addMarkers(lng=balanced_reviews$lng, lat=balanced_reviews$lat, popup=balanced_reviews$Hotel_Name) %>%addWMSTiles(
+      "http://62.236.121.188/arcgis/services/DataAndMaps/Background/MapServer/WMSServer?",
+      layers = "11",
+      options = WMSTileOptions(
+  format = "image/png",
+       transparent = TRUE,
+      ),
+     attribution = "Catchment area provided by HELCOM"
+   )
+  })
+  
+  
+}
+
+shinyApp(ui, server)
