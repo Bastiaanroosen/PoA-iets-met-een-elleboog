@@ -26,6 +26,7 @@ library(tidyr)
 library(ffbase)
 
 #Cold Start#
+rm(conMySQL, conn, drv, population, drivername, path)
 rm(balanced_con, balanced_con2, balanced_reviews, ui, server, bayes_model, bayes_pipeline, bayes_predictions, collected_bayes, partitions, review_tbl, sc, confBayes)
 
 #set work directory
