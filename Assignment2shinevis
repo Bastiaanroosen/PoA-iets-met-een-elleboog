@@ -23,7 +23,9 @@ library(stringr)
 library(tm)
 library(corpus)
 library(tidyr)
+library(ffbase)
 
+rm(balanced_con2, balanced_reviews, ui, server)
 setwd("D:/Users/J-A-J/Desktop/HVA Projecten/Jaar 2/Blok 3 en Blok 4/Project Big Data/Individual-Assignment2")
 getwd()
 
