@@ -118,7 +118,7 @@ server <- function(input, output) {
   
   
   output$hotel_map <- renderLeaflet({
-    leaflet(height = "40%", width = "40%") %>% addTiles() %>% setView(lng =15.08, lat =50.00, zoom = 4) %>% addMarkers(lng=balanced_reviews$lng, lat=balanced_reviews$lat, popup=balanced_reviews$Hotel_Name) %>%addWMSTiles(
+    leaflet(height = "40%", width = "40%") %>% addTiles() %>% setView(lng =15.08, lat =50.00, zoom = 4) %>% addMarkers(clusterOptions =  markerClusterOptions(), lng=balanced_reviews$lng, lat=balanced_reviews$lat, popup=balanced_reviews$Hotel_Name) %>%addWMSTiles(
       "http://62.236.121.188/arcgis/services/DataAndMaps/Background/MapServer/WMSServer?",
       layers = "11",
       options = WMSTileOptions(
