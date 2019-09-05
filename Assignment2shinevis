@@ -4,6 +4,7 @@ library(shiny)
 library(shinydashboard)
 library(plotly)
 library(leaflet)
+library(xml2)
 library(ggplot2)
 library(sparklyr)
 library(mongolite)
@@ -17,8 +18,8 @@ library(DBI)
 library(RMySQL)
 library(naivebayes)
 library(psych)
-library(xml2)
 library(pander)
+library(NLP)
 library(stringr)
 library(tm)
 library(corpus)
@@ -86,7 +87,7 @@ ui <- dashboardPage(
                            leafletOutput("hotel_map")),(box(width = "100%", plotlyOutput("hotelscr"))))
               
               
-                        
+              
               
               #          fluidRow(box(sliderInput("years", "Data per maand", 1,3,1,1)))
               
@@ -103,16 +104,16 @@ server <- function(input, output) {
   
   
   output$hotelscr <- renderPlotly({
-  
-  #   years <- switch(
-  #    input$years,
-  #   Y2015,
-  #    Y2016,
-  #    Y2017,
-  # )
-  
+    
+    #   years <- switch(
+    #    input$years,
+    #   Y2015,
+    #    Y2016,
+    #    Y2017,
+    # )
+    
     hotelscore  <- ggplot(balanced_reviews, aes(x= balanced_reviews$Hotel_Name, y= balanced_reviews$Average_Score)) + geom_point() + theme(axis.text.x = element_text(angle=45, hjust=1))
-    })
+  })
   
   
   
